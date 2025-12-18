@@ -250,17 +250,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['name']) && isset($_POS
             </div>
         </div>
     </div>
-     <!-- Yandex.RTB R-A-5178800-1 -->
-    <div id="yandex_rtb_R-A-5178800-1" style="background-color: rgba(0,0,0,0.6)"></div>
-    <?php include '../template/footer.html'; ?>
-    <script>
-        window.yaContextCb.push(()=>{
-        	Ya.Context.AdvManager.render({
-        		"blockId": "R-A-5178800-1",
-        		"renderTo": "yandex_rtb_R-A-5178800-1"
-        	})
-        })
-    </script>
     <script src="./js/script.js"></script>
 </body>
 </html>

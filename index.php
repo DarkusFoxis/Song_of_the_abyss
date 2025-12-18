@@ -13,7 +13,6 @@
 	<meta name="yandex-verification" content="1b80033520726a53" />
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="yandex-verification" content="81908f918823357a" />
 	<meta name="description" content="Song of the abyss- сайт о DarkusFoxis, человеке, который хочет показать своё творчество всему миру."/>
 	<meta property="og:title" content="Song of the  abyss"/>
 	<meta property="og:site_name" content="Song of the  abyss"/>
@@ -21,8 +20,6 @@
 	<meta property="og:url" content="https://so-ta.ru/index"/>
 	<meta property="og:description" content="Song of the abyss- сайт о DarkusFoxis, человеке, который хочет показать своё творчество всему миру."/>
 	<meta property="og:image" content="./img/icon"/>
-    <script>window.yaContextCb=window.yaContextCb||[]</script>
-    <script src="https://yandex.ru/ads/system/context.js" async></script>
 </head>
 <body>
 <div class="navbar">
@@ -85,16 +82,6 @@
 			</div>
 		</div>
 	</div>
-	<!-- Yandex.RTB R-A-5156957-1 -->
-    <div id="yandex_rtb_R-A-5156957-1"></div>
-    <script>
-        window.yaContextCb.push(()=>{
-        Ya.Context.AdvManager.render({
-	    "blockId": "R-A-5156957-1",
-	    "renderTo": "yandex_rtb_R-A-5156957-1"
-            })
-        })
-    </script>
 </div>
 <?php include './template/footer.html'; ?>
 </body>

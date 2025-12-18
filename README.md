@@ -2,14 +2,14 @@
 
 <div align="center">
 
-[![Russian](https://img.shields.io/badge/🇷🇺-Русский-blue)](#)
+[![Russian](https://img.shields.io/badge/🇷🇺-Русский-blue)](#russian-version)
 [![English](https://img.shields.io/badge/🇺🇸-English-green)](#english-version)
 [![Website](https://img.shields.io/badge/🌐-Website-purple)](https://so-ta.ru)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 </div>
 
-## Русская версия
+## <span id="russian-version">Русская версия</span>
 
 **«Song of the Abyss»** — развлекательная площадка для пользователей, предоставляющая возможность погружения в виртуальный фэнтезийный мир под названием «Бездна», обладающий собственной мифологией, историями и правилами.
 

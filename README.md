@@ -1,99 +1,139 @@
-# Song of the Abyss 🌌
+# Song of the Abyss
 
 <div align="center">
-
 [![Russian](https://img.shields.io/badge/🇷🇺-Русский-blue)](#)
 [![English](https://img.shields.io/badge/🇺🇸-English-green)](#english-version)
 [![Website](https://img.shields.io/badge/🌐-Website-purple)](https://so-ta.ru)
-[![License](https://img.shields.io/badge/license-MIT-orange)](#лицензия)
-
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 </div>
 
-## 🇷🇺 Русская версия
+## Русская версия
 
-### Добро пожаловать в мир Song of the Abyss!
+**«Song of the Abyss»** — развлекательная площадка для пользователей, предоставляющая возможность погружения в виртуальный фэнтезийный мир под названием «Бездна», обладающий собственной мифологией, историями и правилами.
 
-**Song of the Abyss** - это уникальный веб-проект, представляющий собой веб-сайт с множеством интерактивных элементов, включая игры, блог и социальную сеть.
+## Описание
 
-### 🌟 О проекте
+Сервис «Song of the Abyss» является веб-приложением, развивающимся более трёх лет. Основное отличие нашего сервиса от других: отсутствие рекламы, персонализации и сбора информации о пользователях, исключая данные, необходимые для подтверждения аккаунта и защиты от спама.
 
-Song of the Abyss - это креативный веб-сайт, созданный для предоставления пользователям уникального цифрового опыта. Проект включает в себя:
+Платформа позволяет пользователям почувствовать себя одним из героев этого произведения через различные интерактивные разделы: Abyss Net, Travels, Legend и Profile.
 
-- 🎮 Коллекцию мини-игр (Змейка, Тетрис, Flappy Bird и другие)
-- 📚 Литературные произведения и рассказы в жанре фэнтези
-- 🌐 Социальную сеть "Abyss Net" для общения пользователей
-- 🎵 Музыкальные композиции и медиа-контент
-- 🖌️ Интерактивные инструменты (например, доска для рисования)
+## Основные разделы
 
-### 🔧 Основные возможности
+### 🌐 Abyss Net
+Социальный раздел для взаимодействия пользователей:
+- Создание постов с изображениями, музыкой и видео;
+- Сервис для прослушивания музыки «AbyssNet Song»;
+- Внутренний поисковик «Abyss Search» для поиска информации по локальной базе данных сайта.
 
-- **Игры**: Классические и авторские игры для развлечения
-- **Литература**: Оригинальные истории и фанфики в мире Бездны
-- **Социальная сеть**: Abyss Net - первый в своем роде блог/социальная платформа в мире проекта
-- **Профиль пользователя**: Персонализация опыта с помощью системы профилей и достижений
-- **Мультимедиа**: Поддержка аудио, видео и изображений в постах
+### 🎮 Travels
+Игровой раздел с разнообразными развлечениями:
+- Классические игры (Змейка, Тетрис, Текстовый квест, Flappy bird, Подземелье);
+- Доска для рисования;
+- Игра собственной разработки «SotA Game»;
+- Внутренние ресурсы (монеты, лепестки и кристаллы) для покупки косметических элементов во внутреннем магазине.
 
-### 🛠 Технологии
+### ✍️ Legend
+Творческий раздел для авторов:
+- Рассказы от создателя сайта;
+- «Рассказы бездны» — площадка для пользовательских историй;
+- Ручная модерация контента на предмет запрещённых тем;
+- Планы по внедрению нейросетевой проверки контента в будущем.
 
-- **Frontend**: HTML5, CSS3, JavaScript, Bootstrap
-- **Backend**: PHP, MySQL
-- **Дополнительно**: jQuery, AJAX для динамического контента
+### 👤 Profile
+Раздел личного кабинета пользователя:
+- Обмен ресурсами с другими пользователями;
+- Внутренняя почта сайта;
+- Публикация постов и комментариев (в Abyss Net);
+- Добавление ссылок в локальную базу поисковика (в Abyss Search);
+- Доступ к нейросетям на сайте;
+- Публикация собственных рассказов (в Legend).
 
-### 👨‍💻 Автор
+## Техническая информация
 
-Проект создан и поддерживается **DarkusFoxis** - студентом и энтузиастом программирования с любовью к аниме, японской культуре и современным технологиям.
+- **Серверная часть:** PHP 8.2;
+- **Клиентская часть:** JavaScript с библиотекой jQuery 3.7.1;
+- **Защита от спама:** Подтверждение по электронной почте с использованием библиотеки PhPMailer;
+- **Безопасность:** Минимизация сбора пользовательских данных для обеспечения приватности.
+
+## Лицензия
+
+Этот проект распространяется под лицензией [AGPL-3.0](LICENSE).
+
+## Об авторе
+
+Проект разработан DarkusFoxis. 
+Подробнее об авторе: https://so-ta.ru/about_me
+
+## Обратная связь
+
+Мы ценим вашу обратную связь и постоянно работаем над улучшением платформы. Наша цель — создать удобную, стабильную и функциональную платформу для всех пользователей, с возможностями для творчества и развлечений.
 
 ---
 
 ## English Version
 
-### Welcome to the World of Song of the Abyss!
+**"Song of the Abyss"** is an entertainment platform that allows users to immerse themselves in a virtual fantasy world called "The Abyss" with its own mythology, stories, and rules.
 
-**Song of the Abyss** is a unique web project featuring a website with multiple interactive elements including games, blog, and social networking capabilities.
+## Description
 
-### 🌟 About the Project
+The "Song of the Abyss" service is a web application under development for over three years. The key difference from other services is the absence of advertising, personalization, and user data collection, except for the data necessary to verify accounts and protect against spam.
 
-Song of the Abyss is a creative website designed to provide users with a unique digital experience. The project includes:
+The platform allows users to feel like one of the heroes of this work through various interactive sections: Abyss Net, Travels, Legend, and Profile.
 
-- 🎮 A collection of mini-games (Snake, Tetris, Flappy Bird and others)
-- 📚 Literary works and fantasy stories
-- 🌐 Social network "Abyss Net" for user communication
-- 🎵 Musical compositions and media content
-- 🖌️ Interactive tools (such as drawing board)
+## Main Sections
 
-### 🔧 Key Features
+### 🌐 Abyss Net
+Social section for user interaction:
+- Create posts with images, music, and videos;
+- Music listening service "AbyssNet Song";
+- Internal search engine "Abyss Search" to find information in the site's local database.
 
-- **Games**: Classic and custom games for entertainment
-- **Literature**: Original stories and fan fiction in the world of the Abyss
-- **Social Network**: Abyss Net - the first blog/social platform in the project's world
-- **User Profiles**: Personalization with profile and achievement systems
-- **Multimedia**: Support for audio, video, and images in posts
+### 🎮 Travels
+Gaming section with various entertainment options:
+- Classic games (Snake, Tetris, Text Quest, Flappy Bird, Dungeon);
+- Drawing board;
+- Self-developed game "SotA Game";
+- Internal resources (coins, petals, and crystals) to purchase cosmetic items in the internal store.
 
-### 🛠 Technologies
+### ✍️ Legend
+Creative section for authors:
+- Stories from the site creator;
+- "Tales of the Abyss" — a platform for user stories;
+- Manual content moderation for prohibited topics;
+- Plans to implement neural network content verification in the future.
 
-- **Frontend**: HTML5, CSS3, JavaScript, Bootstrap
-- **Backend**: PHP, MySQL
-- **Additional**: jQuery, AJAX for dynamic content
+### 👤 Profile
+User personal account section:
+- Resource exchange with other users;
+- Internal site mail;
+- Posting and commenting (in Abyss Net);
+- Adding links to the local search engine database (in Abyss Search);
+- Access to neural networks on the site;
+- Publishing your own stories (in Legend).
 
-### 👨‍💻 Author
+## Technical Information
 
-Project created and maintained by **DarkusFoxis** - a student and programming enthusiast with a love for anime, Japanese culture, and modern technologies.
-
----
-
-## 📄 Лицензия
-
-Этот проект распространяется под лицензией MIT. Смотрите файл [LICENSE](LICENSE) для получения дополнительной информации.
+- **Server-side:** PHP 8.2;
+- **Client-side:** JavaScript with jQuery 3.7.1 library;
+- **Spam protection:** Email confirmation using the open-source PhPMailer library;
+- **Security:** Minimization of user data collection to ensure privacy.
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
+This project is licensed under [AGPL-3.0](LICENSE).
+
+## About the Author
+
+The project was developed by DarkusFoxis.
+More about the author: https://so-ta.ru/about_me
+
+## Feedback
+
+We value your feedback and are constantly working to improve the platform. Our goal is to create a convenient, stable, and functional platform for all users, with opportunities for creativity and entertainment.
 
 ---
 
 <div align="center">
-
 ### 🌌 *"Изучайте новое и находите интересное в самых неожиданных местах"*  
 ### 🌌 *"Explore new things and find interesting things in the most unexpected places"*
-
 </div>

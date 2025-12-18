@@ -136,6 +136,8 @@ We value your feedback and are constantly working to improve the platform. Our g
 ---
 
 <div align="center">
+
 ### 🌌 *"Изучайте новое и находите интересное в самых неожиданных местах"*  
 ### 🌌 *"Explore new things and find interesting things in the most unexpected places"*
+
 </div>

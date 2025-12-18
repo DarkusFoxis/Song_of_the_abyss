@@ -1,0 +1,92 @@
+html, body{
+    height: 100%;
+    margin: 0;
+}
+body{
+    background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #FFDAB9;
+}
+.link{
+	color: yellow;
+}
+.link:hover{
+	color: red;
+}
+#flower {
+  position: relative;
+  cursor: pointer;
+}
+#info {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: rgba(43, 0, 84, 0.8);
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(75, 0, 130, 0.5);
+}
+.context-menu {
+  display: none;
+  position: absolute;
+  background-color: rgba(43, 0, 84, 0.8);
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 0 20px rgba(75, 0, 130, 0.5);
+  padding: 8px 0;
+  z-index: 2;
+  width: 300px;
+  font-size: 14px;
+}
+
+.context-menu ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.context-menu li {
+  padding: 8px 16px;
+}
+
+.context-menu .context-menu-title {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.context-menu li ul {
+  padding-left: 20px;
+}
+
+.context-menu li ul li {
+  padding: 4px 0;
+}
+.upgrade-container {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(43, 0, 84, 0.8);
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(75, 0, 130, 0.5);
+}
+button{
+    background-color: #222222;
+    border: 2px solid #4B0082;
+    color: #7B68EE;
+    padding: 5px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(75, 0, 130, 0.5);
+}
+button:hover{
+    background-color: #333333;
+    box-shadow: 0 0 30px rgba(75, 0, 130, 0.8);
+}

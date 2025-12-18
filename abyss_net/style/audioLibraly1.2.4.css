@@ -1,0 +1,684 @@
+body {
+    padding-bottom: 50px;
+}
+.track-card {
+    background-color: rgba(0, 0, 0, 0.6);
+    border-radius: 15px;
+    padding: 5px 15px;
+    margin: 15px auto;
+    max-width: 600px;
+    color: #eee;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+.track-card_avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-right: 15px;
+    object-fit: cover;
+}
+.track-card_info {
+    flex: 1;
+    margin-right: 10px;
+}
+.track-title {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+.track-uploader {
+    font-size: 0.95em;
+    color: #999;
+    margin-bottom: 3px;
+}
+.track-artist {
+    font-size: 1.05em;
+    color: #ccc;
+}
+.track-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+.track-buttons img{
+    width: 35px;
+    height: 35px;
+}
+.queue-btn, .share-btn, .play-btn {
+    background: #444;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 6px 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 0.9em;
+    margin-top: 5px;
+    text-align: center;
+}
+.queue-btn:hover, .share-btn:hover {
+    background-color: #666;
+}
+#player-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(30, 10, 60, 0.95);
+    color: #eee;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 15px;
+    z-index: 1000;
+}
+#player-bar .controls {
+    display: flex;
+    align-items: center;
+}
+#player-bar button {
+    background: #9966cc;  
+    border: none;
+    color: white;
+    padding: 3px;
+    border-radius: 5px;
+    margin: 0 3px;
+    cursor: pointer;
+    font-size: 1.1em;
+    line-height: 1;
+}
+#player-bar button:last-child {
+    margin-right: 5px;
+}
+#player-bar button img{
+    width: 25px;
+    height: 25px;
+}
+#player-bar button#repeat.active {
+    background-color: #7a3dcc;
+    box-shadow: inset 0 0 5px rgba(255,255,255,0.5);
+}
+#player-bar .progress-volume {
+    display: flex;
+    align-items: center;
+    flex-grow: 1;
+    margin: 0 10px;
+}
+#progress {
+     flex-grow: 1;
+     margin: 0 10px;
+     cursor: pointer;
+     height: 8px;
+     appearance: none;
+     background: #555;
+     border-radius: 4px;
+     outline: none;
+}
+#progress::-webkit-slider-thumb {
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    background: #9966cc;
+    border-radius: 50%;
+    cursor: pointer;
+}
+#progress::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    background: #9966cc;
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+}
+#volume {
+    width: 80px;
+    cursor: pointer;
+    height: 8px;
+     appearance: none;
+     background: #555;
+     border-radius: 4px;
+     outline: none;
+}
+#volume::-webkit-slider-thumb {
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    background: #9966cc;
+    border-radius: 50%;
+    cursor: pointer;
+}
+#volume::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    background: #9966cc;
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+}
+#now-playing {
+    flex-basis: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 10px;
+    font-size: 0.9em;
+}
+.time_data {
+    font-size: 0.9em;
+    min-width: 80px;
+    text-align: center;
+}
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(3px);
+}
+.modal-content {
+    background-color: #1a1a2a;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #444;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 400px;
+    color: #eee;
+    box-shadow: 0 0 20px rgba(153, 102, 204, 0.4);
+}
+.active {
+    background-color: #7a3dcc;
+    box-shadow: inset 0 0 5px rgba(255,255,255,0.5);
+}
+.close-btn {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.close-btn:hover,
+.close-btn:focus {
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+}
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+}
+.close:hover {
+    color: #fff;
+}
+#queue-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 15px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+#queue-list li {
+    background-color: #333;
+    margin-bottom: 8px;
+    padding: 10px 15px;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: grab;
+}
+#queue-list li.playing {
+    background-color: #444;
+    border-left: 4px solid #9966cc;
+}
+#queue-list li span {
+     overflow: hidden;
+     white-space: nowrap;
+     text-overflow: ellipsis;
+     margin-right: 10px;
+}
+.queue-item-controls button {
+    background: none;
+    border: none;
+    color: #aaa;
+    cursor: pointer;
+    font-size: 1.1em;
+    margin-left: 8px;
+    padding: 2px;
+}
+.queue-item-controls button img {
+    width: 25px;
+    height: 25px;
+}
+.queue-item-controls button:hover {
+    color: #fff;
+}
+.gu-mirror {
+    position: fixed !important;
+    margin: 0 !important;
+    z-index: 9999 !important;
+    opacity: 0.8;
+    background-color: #555;
+    color: #fff;
+    padding: 10px 15px;
+    border-radius: 5px;
+    list-style: none;
+}
+.gu-hide { display: none !important; }
+.gu-unselectable { -webkit-user-select: none !important; -moz-user-select: none !important; -ms-user-select: none !important; user-select: none !important; }
+.gu-transit { opacity: 0.3; background-color: #666; }
+#akihiro-quote {
+    font-family: 'Monserrat Alternates', sans-serif;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+    display: block;
+}
+#akihiro-visualizer {
+    height: 40px;
+    mix-blend-mode: screen;
+    filter: drop-shadow(0 0 3px #9966cc);
+}
+.fullscreen-player {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 20px;
+    font-family: 'Montserrat Alternates', sans-serif;
+}
+.fullscreen-player.hidden {display: none;}
+.player-background {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-size: cover;
+    /* background-repeat: no-repeat; */
+    background-position: center;
+    opacity: 0.2;
+    z-index: 0;
+}
+.fullscreen-content {
+    position: relative;
+    z-index: 1;
+    color: #eee;
+    text-align: center;
+    width: 100%;
+    max-width: 800px;
+}
+.track-info h2 { font-size: 2em; margin: 10px 0; }
+.track-info p { font-size: 1.1em; color: #ccc; }
+.fs-controls button {
+    background: #9966cc;
+    border: none;
+    border-radius: 10px;
+    margin: 0 10px;
+    padding: 10px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+.fs-controls button:hover { background: #ba77dd; }
+.fs-progress {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin: 15px 0;
+    color: #eee;
+}
+#fs-progress { flex-grow: 1; }
+#fs-volume { width: 150px; }
+#fs-visualizer {
+    width: 100%;
+    /*height: 80px;*/
+    background: transparent;
+    margin: 20px 0;
+}
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 2em;
+    color: #fff;
+    cursor: pointer;
+}
+
+.fs-controls button img {
+    width: 25px;
+    height: 25px;
+}
+
+.fs-controls button#fs-repeat .active {
+    background-color: #7a3dcc;
+    box-shadow: inset 0 0 5px rgba(255,255,255,0.5);
+}
+@media (max-width: 768px) {
+    body {
+        padding-bottom: 80px;
+    }
+    #akihiro-quote {
+        display: none;
+    }
+    #add_text{
+        display: none;
+    }
+    #akihiro-visualizer {
+        margin-bottom: 10%;
+    }
+    #player-bar {
+         padding: 10px 10px;
+     }
+    .progress-volume {
+        flex-direction: column;
+        align-items: stretch;
+        flex-grow: 1;
+        margin: 5px 0;
+    }
+    #progress, #volume {
+        width: 100%;
+        margin: 3px 0;
+    }
+    #now-playing {
+        flex-basis: 100%;
+        text-align: center;
+        margin-bottom: 5px;
+        font-size: 0.9em;
+    }
+    .controls { order: 1;}
+    .time_data { order: 2;}
+    .progress-volume { order: 3;}
+    .modal-content {
+         width: 90%;
+         margin: 15% auto;
+    }
+    .navbar { display: none; }
+}
+@media (max-width: 520px) {
+    body {
+        padding-bottom: 135px;
+    }
+    #akihiro-quote {
+        display: none;
+    }
+    #akihiro-visualizer {
+        margin-bottom: 17%;
+    }
+    #title_site {
+        display: none;
+    }
+    .track-card {
+        padding: 10px;
+    }
+    .track-card_avatar {
+        width: 50px;  
+        height: 50px;  
+        margin-right: 10px;  
+    }
+    .track-title {
+        font-size: 1em;  
+        margin-bottom: 3px;  
+    }
+    .track-uploader {
+        font-size: 0.75em;  
+        margin-bottom: 1px;  
+    }
+    .track-artist {
+        font-size: 0.85em;  
+    }
+    .queue-btn, .share-btn, .play-btn {
+        padding: 4px 6px;  
+        font-size: 0.8em;  
+        min-width: 70px;
+    }
+    #player-bar button {
+        padding: 4px 8px;
+        font-size: 1em;
+    }
+    .time_data {
+        font-size: 0.85em;  
+        min-width: 70px;
+    }
+    #now-playing {
+         font-size: 0.8em;  
+     }
+}
+.mobile-nav {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 9999;
+}
+.nav-toggle {
+    background: #222;
+    border: none;
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+}
+.nav-panel {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    background: rgba(10, 10, 20, 0.95);
+    padding: 10px;
+    border-radius: 12px;
+    margin-top: 8px;
+    box-shadow: 0 0 15px rgba(153, 102, 204, 0.3);
+}
+.nav-panel a {
+    color: #eee;
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    transition: background 0.2s;
+}
+.nav-panel a:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+@media (min-width: 768px) {
+    .mobile-nav { display: none; }
+}
+/* Стили для модального окна настроек визуализатора */
+#visualizerSettingsModal .modal-content {
+    background: #1a1a2a;
+    border: 1px solid #444;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(153, 102, 204, 0.4);
+    animation: fadeIn 0.3s ease-out;
+    padding: 30px 25px;
+    max-width: 500px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Заголовок модального окна */
+#visualizerSettingsModal .modal-content h2 {
+    color: #9966cc;
+    font-size: 1.5em;
+    margin-bottom: 25px;
+    text-align: center;
+    letter-spacing: 0.5px;
+    position: relative;
+}
+
+#visualizerSettingsModal .modal-content h2::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #9966cc, transparent);
+}
+
+/* Кастомный чекбокс */
+.custom-checkbox {
+    position: relative;
+    padding-left: 35px;
+    cursor: pointer;
+    font-size: 1em;
+    user-select: none;
+    margin-bottom: 20px;
+    display: block;
+}
+
+.custom-checkbox input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkmark {
+    position: absolute;
+    top: 2px;
+    left: 0;
+    height: 20px;
+    width: 20px;
+    background-color: #333;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+/* Эффект при наведении */
+.custom-checkbox:hover .checkmark {
+    background-color: #444;
+}
+
+/* Проверка */
+.custom-checkbox input:checked ~ .checkmark {
+    background-color: #9966cc;
+}
+
+/* Создание галочки */
+.custom-checkbox .checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 7px;
+    top: 3px;
+    width: 6px;
+    height: 12px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.custom-checkbox input:checked ~ .checkmark:after {
+    display: block;
+}
+
+/* Стили для селекта качества */
+#quality-select {
+    width: 100%;
+    padding: 10px 15px;
+    margin: 15px 0 25px;
+    background-color: #2a2a3a;
+    border: none;
+    border-radius: 8px;
+    color: #eee;
+    font-size: 1em;
+    appearance: none;
+    position: relative;
+    z-index: 1;
+}
+
+/* Кастомная стрелка для селекта */
+#quality-select::after {
+    content: "▼";
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #9966cc;
+    font-size: 0.8em;
+    z-index: -1;
+}
+
+/* Стили для кнопки сохранения */
+#saveVisualizerSettings {
+    width: 100%;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #9966cc, #7a3dcc);
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-size: 1.1em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(153, 102, 204, 0.3);
+}
+
+#saveVisualizerSettings:hover {
+    transform: scale(1.03);
+    box-shadow: 0 6px 20px rgba(153, 102, 204, 0.4);
+}
+
+/* Адаптивность */
+@media (max-width: 520px) {
+    #visualizerSettingsModal .modal-content {
+        padding: 20px 15px;
+        margin: 10% auto;
+    }
+    
+    #visualizerSettingsModal .modal-content h2 {
+        font-size: 1.3em;
+    }
+    
+    #quality-select {
+        font-size: 0.95em;
+    }
+    
+    #saveVisualizerSettings {
+        font-size: 1em;
+        padding: 10px 15px;
+    }
+}
+
+/* Поле поиска треков */
+#trackSearch {
+    width: 100%;
+    padding: 8px 12px;
+    margin-bottom: 15px;
+    border: 1px solid #555;
+    border-radius: 10px;
+    background-color: rgba(0, 0, 0, 0.4); /* полупрозрачный черный */
+    color: #eee;
+    box-sizing: border-box;
+    font-size: 1em;
+    transition: border-color 0.3s ease;
+}
+
+#trackSearch:focus {
+    outline: none;
+    border-color: #9966cc;
+    box-shadow: 0 0 5px rgba(153, 102, 204, 0.5);
+}
+
+#trackSearch::placeholder {
+    color: #aaa;
+}

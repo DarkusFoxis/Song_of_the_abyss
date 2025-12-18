@@ -1,0 +1,8 @@
+<svg id="svg" fill="#000000" stroke="#000000" width="200px" height="200px" version="1.1" viewBox="144 144 512 512" xmlns="http://www.w3.org/2000/svg" data-darkreader-inline-fill="" data-darkreader-inline-stroke="" style="--darkreader-inline-fill: var(--darkreader-background-000000, #000000); --darkreader-inline-stroke: var(--darkreader-text-000000, #e8e6e3);">
+    <g id="IconSvg_bgCarrier" stroke-width="0"></g>
+    <g id="IconSvg_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#CCCCCC" data-darkreader-inline-stroke="" style="--darkreader-inline-stroke: var(--darkreader-text-cccccc, #c8c3bc);"></g>
+     <g id="IconSvg_iconCarrier">
+      <path xmlns="http://www.w3.org/2000/svg" d="m539.55 519.4-93.207-92.703c14.609-18.137 22.672-40.809 22.672-63.984 0-56.426-45.848-102.27-102.27-102.27-56.426 0-102.78 45.848-102.78 102.27 0 56.426 45.848 102.27 102.27 102.27 23.68 0 46.855-8.0625 64.992-23.176l93.203 93.203c1.0078 1.0078 2.5195 1.5117 3.5273 1.5117 1.0078 0 2.5195-0.50391 3.5273-1.5117l8.0625-8.0625c1.0078-1.0078 1.5117-2.0156 1.5117-3.5273 0-1.5039-0.50391-3.0156-1.5117-4.0234zm-92.199-156.69c0 44.84-36.273 81.113-81.113 81.113-44.84 0-81.113-36.273-81.113-81.113s36.273-81.113 81.113-81.113c44.84 0 81.113 36.277 81.113 81.113z"></path>
+
+      </g>
+      </svg>

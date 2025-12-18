@@ -1,0 +1,180 @@
+html {
+  height: 100%;
+  background-color: #1E2023;
+}
+
+@keyframes animSnow {
+  from {
+    background-position: 0 0;
+    opacity: 0;
+  }
+  50% {
+    background-position: 60px 60px;
+    opacity: 1;
+  }
+  to {
+    background-position: 120px 120px;
+    opacity: 0;
+  }
+}
+
+body {
+  background: linear-gradient(to right, #1E2023, #2C2F34, #3F4248);
+  min-height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  color: #CCCCCC;
+  font-family: 'Montserrat Alternates', sans-serif;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: radial-gradient(circle, rgba(200, 200, 200, 0.19) 1px, transparent 1px);
+  background-size: 35px 35px;
+  background-position: -25px -25px;
+  background-repeat: repeat;
+  animation: animSnow 12s linear infinite;
+}
+
+.navbar {
+  clear: both;
+  overflow: hidden;
+  background-color: rgba(79, 0, 0, 0.8); /* Темно-красный цвет */
+  border-bottom: 1px solid rgba(153, 0, 0, 0.4); /* Кровавый оттенок */
+  padding: 0px 1rem 0px;
+}
+
+.navbar a {
+  float: left;
+  font-size: 16px;
+  color: rgba(204, 204, 204, 0.8); /* Приглушенный серый цвет ссылок */
+  text-align: center;
+  padding: 10px 10px;
+  text-decoration: none;
+  transition: color 0.3s, background-color 0.3s;
+}
+
+.navbar a:hover {
+  color: #FFFFFF; /* Белый цвет ссылок при наведении */
+  background-color: rgba(153, 0, 0, 0.4); /* Более яркий кровавый оттенок при наведении */
+}
+
+.content-main {
+  background-color: rgba(30, 32, 35, 0.7);
+  color: #CCCCCC;
+}
+
+.footer {
+  color: #CCCCCC;
+  background-color: rgba(60, 64, 70, 0.7);
+}
+
+.link {
+  color: #FFCC00;
+}
+
+.link:hover {
+  color: #FF6666;
+}
+
+button {
+  background: linear-gradient(to right, #1f2e82, #3b497e);
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  background: linear-gradient(to left, #1f2e82, #3b497e);
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+.modal-content {
+  background-color: rgba(27, 35, 58, 0.8);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: #fff;
+  margin: 5% auto;
+  padding: 20px;
+  border: 1px solid #2c3864;
+  width: 75%;
+  height: 75%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.modal-content h2 {
+  margin-bottom: 20px;
+  color: #980002;
+}
+
+.modal-content button {
+  margin: 5px;
+}
+
+#slideSong{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#seekSlider {
+  width: 60%;
+  margin: 10px 0;
+  -webkit-appearance: none; /* Для Safari и Chrome */
+  appearance: none; /* Для других браузеров */
+  height: 10px;
+  background-color: #ccc;
+  outline: none;
+}
+
+#seekSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  background-color: #2c3864;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.close {
+  color: #ccc;
+  font-size: 28px;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+.close:hover,
+.close:focus {
+  color: #fff;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.btn-playing {
+  opacity: 0.1;
+  cursor: not-allowed;
+}

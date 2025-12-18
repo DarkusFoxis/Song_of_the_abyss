@@ -1,0 +1,355 @@
+<style>
+.df-player {
+  --accent: #e524ff;
+  --text: #fff;
+  --muted: rgba(255,255,255,0.7);
+  position: relative;
+  background: rgba(0,0,0,0.6);
+  border: 2px solid rgba(229,36,255,0.2);
+  border-radius: 12px;
+  overflow: hidden;
+  font-family: "Segoe UI", Roboto, sans-serif;
+  box-shadow: 0 0 20px rgba(229,36,255,0.1);
+}
+.df-player video {
+  width: 100%;
+  height: auto;
+  display: block;
+  background: black;
+}
+.df-controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(180deg, transparent, rgba(0,0,0,0.7));
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: opacity 0.3s;
+}
+.df-controls.hide {
+  opacity: 0;
+  pointer-events: none;
+}
+.df-progress {
+  height: 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 99px;
+  position: relative;
+  cursor: pointer;
+}
+.df-played {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  background: var(--accent);
+  width: 0%;
+  border-radius: 99px;
+  box-shadow: 0 0 6px var(--accent);
+}
+.df-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.df-left, .df-right { display: flex; align-items: center; gap: 8px; }
+.df-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+.df-btn svg {
+  width: 18px; height: 18px;
+  stroke: var(--text);
+  stroke-width: 2;
+  fill: none;
+  transition: stroke 0.2s, transform 0.2s;
+}
+.df-btn:hover svg {
+  stroke: var(--accent);
+  transform: scale(1.1);
+}
+.df-time {
+  font-size: 13px;
+  color: var(--muted);
+  min-width: 80px;
+  text-align: left;
+}
+.df-volume input[type="range"] {
+  width: 100px;
+  appearance: none;
+  height: 5px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 8px;
+}
+.df-volume input::-webkit-slider-thumb {
+  appearance: none;
+  width: 12px; height: 12px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--accent);
+}
+.df-speed {
+  background: rgba(255,255,255,0.08);
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 6px;
+  padding: 4px 4px;
+}
+.df-toast {
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.8);
+  color: var(--text);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+}
+.df-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-8px);
+}
+@media (max-width: 600px) {
+  .df-controls {
+    padding: 6px;
+    gap: 6px;
+  }
+  .df-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+  .df-left, .df-right {
+    justify-content: space-between;
+    width: 100%;
+  }
+  .df-btn svg {
+    width: 18px;
+    height: 18px;
+  }
+  .df-volume input[type="range"] {
+    width: 80px;
+  }
+  .df-speed {
+    font-size: 12px;
+    padding: 3px 5px;
+  }
+  .df-time {
+    font-size: 12px;
+    min-width: auto;
+  }
+  .df-controls {
+    background: linear-gradient(180deg, rgba(0,0,0,0.0), rgba(0,0,0,0.65));
+  }
+}
+.df-player:fullscreen,
+.df-player:-webkit-full-screen,
+.df-player:-moz-full-screen {
+  position: fixed !important;
+  top: 0; left: 0;
+  width: 100vw !important;
+  height: 100vh !important;
+  max-width: 100vw !important;
+  max-height: 100vh !important;
+  background: black !important;
+  border-radius: 0 !important;
+  z-index: 99999;
+}
+.df-player:fullscreen video,
+.df-player:-webkit-full-screen video,
+.df-player:-moz-full-screen video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain !important;
+  background: black !important;
+}
+.df-player:fullscreen .df-controls,
+.df-player:-webkit-full-screen .df-controls,
+.df-player:-moz-full-screen .df-controls {
+  padding: 10px;
+  background: linear-gradient(180deg, rgba(0,0,0,0.0), rgba(0,0,0,0.7));
+}
+</style>
+
+<script>
+window.DFPlayerInit = function(container = document) {
+  if (window.DFPlayerVolume === undefined) {
+    const stored = localStorage.getItem("dfplayer_volume");
+    window.DFPlayerVolume = stored ? parseFloat(stored) : 1.0;
+  }
+
+  function formatTime(sec) {
+    if (!isFinite(sec)) return "00:00";
+    sec = Math.floor(sec);
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  }
+
+  const videos = container.querySelectorAll("video:not([data-df-init])");
+  videos.forEach(v => {
+    v.dataset.dfInit = "1";
+    const wrap = document.createElement("div");
+    wrap.className = "df-player";
+    const video = v.cloneNode(true);
+    video.removeAttribute("controls");
+    video.volume = window.DFPlayerVolume;
+    wrap.appendChild(video);
+
+    const controls = document.createElement("div");
+    controls.className = "df-controls";
+
+    const progress = document.createElement("div");
+    progress.className = "df-progress";
+    const played = document.createElement("div");
+    played.className = "df-played";
+    progress.appendChild(played);
+
+    const row = document.createElement("div");
+    row.className = "df-row";
+    const left = document.createElement("div"); left.className = "df-left";
+    const right = document.createElement("div"); right.className = "df-right";
+
+    const btn = (svgPath, title) => {
+      const b = document.createElement("button");
+      b.className = "df-btn";
+      b.title = title;
+      b.innerHTML = `<svg viewBox='0 0 24 24'><path d='${svgPath}'/></svg>`;
+      return b;
+    };
+
+    const playBtn = btn("M8 5v14l11-7z", "Воспроизвести");
+    const pauseBtn = btn("M6 4h4v16H6zm8 0h4v16h-4z", "Пауза");
+    pauseBtn.style.display = "none";
+
+    const time = document.createElement("div");
+    time.className = "df-time";
+    time.textContent = "00:00 / 00:00";
+
+    const volWrap = document.createElement("div");
+    volWrap.className = "df-volume";
+    const volRange = document.createElement("input");
+    volRange.type = "range";
+    volRange.min = 0; volRange.max = 1;
+    volRange.step = 0.01;
+    volRange.value = window.DFPlayerVolume;
+    volWrap.appendChild(volRange);
+
+    const speed = document.createElement("select");
+    speed.className = "df-speed";
+    [0.5,1,1.5,2].forEach(r=>{
+      const o=document.createElement("option");
+      o.value=r;o.textContent=r+"x";
+      if(r===1)o.selected=true;
+      speed.appendChild(o);
+    });
+
+    const screenshotBtn = btn("M4 5h16v14H4z M9 3h6v2H9z M12 9a3 3 0 1 1 0 6a3 3 0 0 1 0-6z","Скриншот");
+    const fullscreenBtn = btn("M4 4h6v2H6v4H4zm10 0h6v6h-2V6h-4zM4 14h2v4h4v2H4zm14 0h2v6h-6v-2h4z","Полноэкранный");
+
+    left.append(playBtn,pauseBtn,time);
+    right.append(volWrap,speed,screenshotBtn,fullscreenBtn);
+    row.append(left,right);
+    controls.append(progress,row);
+    wrap.append(controls);
+
+    const toast = document.createElement("div");
+    toast.className = "df-toast";
+    toast.textContent = "Скриншот скопирован!";
+    wrap.appendChild(toast);
+
+    v.replaceWith(wrap);
+
+    function updateTime() {
+      time.textContent = `${formatTime(video.currentTime)} / ${formatTime(video.duration)}`;
+      played.style.width = (video.currentTime / video.duration * 100 || 0) + "%";
+    }
+    playBtn.onclick = ()=>video.play();
+    pauseBtn.onclick = ()=>video.pause();
+    video.onplay = ()=>{playBtn.style.display="none";pauseBtn.style.display="flex";};
+    video.onpause = ()=>{playBtn.style.display="flex";pauseBtn.style.display="none";};
+    video.ontimeupdate = updateTime;
+    video.onloadedmetadata = updateTime;
+
+    volRange.oninput = e => {
+      const vol = parseFloat(e.target.value);
+      window.DFPlayerVolume = vol;
+      localStorage.setItem("dfplayer_volume", vol);
+      video.volume = vol;
+
+      document.querySelectorAll('.df-player video').forEach(v2 => v2.volume = vol);
+      document.querySelectorAll('.df-volume input[type=range]').forEach(r => r.value = vol);
+    };
+
+    speed.onchange = e=>video.playbackRate=parseFloat(e.target.value);
+    progress.onclick = e=>{
+      const rect = progress.getBoundingClientRect();
+      video.currentTime = (e.clientX-rect.left)/rect.width*video.duration;
+    };
+    fullscreenBtn.onclick = () => {
+      if (!document.fullscreenElement) {
+        wrap.requestFullscreen().then(() => {
+          video.dataset.prevWidth = video.style.width;
+          video.dataset.prevHeight = video.style.height;
+          video.dataset.prevMaxWidth = video.style.maxWidth;
+          video.dataset.prevMaxHeight = video.style.maxHeight;
+          video.dataset.prevObjectFit = video.style.objectFit;
+    
+          video.style.width = "100vw";
+          video.style.height = "100vh";
+          video.style.maxWidth = "100vw";
+          video.style.maxHeight = "100vh";
+          video.style.objectFit = "contain";
+        }).catch(err => console.warn("Fullscreen error:", err));
+      } 
+      else {
+        document.exitFullscreen().then(() => {
+          video.style.width = video.dataset.prevWidth || "";
+          video.style.height = video.dataset.prevHeight || "";
+          video.style.maxWidth = video.dataset.prevMaxWidth || "";
+          video.style.maxHeight = video.dataset.prevMaxHeight || "";
+          video.style.objectFit = video.dataset.prevObjectFit || "";
+        }).catch(err => console.warn("Exit fullscreen error:", err));
+      }
+    };
+
+    screenshotBtn.onclick = async()=>{
+      const canvas=document.createElement("canvas");
+      canvas.width=video.videoWidth;canvas.height=video.videoHeight;
+      const ctx=canvas.getContext("2d");
+      ctx.drawImage(video,0,0,canvas.width,canvas.height);
+      canvas.toBlob(async blob=>{
+        try{
+          await navigator.clipboard.write([new ClipboardItem({[blob.type]:blob})]);
+          toast.classList.add("show");
+          setTimeout(()=>toast.classList.remove("show"),1500);
+        }catch(err){alert("Ошибка копирования: "+err);}
+      },"image/png");
+    };
+
+    let hideT;
+    const show=()=>{
+      controls.classList.remove("hide");
+      clearTimeout(hideT);
+      if(!video.paused) hideT=setTimeout(()=>controls.classList.add("hide"),2000);
+    };
+    wrap.onmousemove=show;
+    wrap.onmouseenter=show;
+    wrap.onmouseleave=()=>{if(!video.paused)controls.classList.add("hide");};
+  });
+};
+
+window.addEventListener("DOMContentLoaded",()=>DFPlayerInit());
+</script>

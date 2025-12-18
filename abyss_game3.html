@@ -1,0 +1,2091 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel = "icon" href = "./img/icon.png">
+<meta name="description" content="Игра &quot;Путешествие в бездне&quot;! Играйте, пока мы работаем над новым обновлением! (дайте пожалуйста время, я очень стараюсь как можно быстрее...)">
+<meta property="og:title" content="Путешествие в бездну"/>
+<meta property="og:site_name" content="Song of the abyss"/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://so-ta.ru/abyss_game"/>
+<meta property="og:description" content="Игра &quot;Путешествие в бездне&quot;! Играйте, пока мы работаем над новым обновлением! (дайте пожалуйста время, я очень стараюсь как можно быстрее...)"/>
+<meta property="og:image" content="https://so-ta.ru/profile/stikers/avrora_default_com.webp"/>
+<title>Путешествие в бездну</title>
+<style>
+    * {margin: 0;padding: 0;box-sizing: border-box;}
+    body {background: #0a0a0a;display: flex;flex-direction: column;justify-content: center;align-items: center;min-height: 100vh;font-family: Arial, sans-serif;color: #fff;overflow: hidden;}
+    #startScreen {position: fixed;top: 0;left: 0;width: 100%;height: 100%;background: linear-gradient(135deg, #0a0014 0%, #1a0a2e 100%);display: flex;justify-content: center;align-items: center;z-index: 1000;padding: 20px;}
+    .start-container {max-width: 600px;width: 100%;background: rgba(20, 10, 40, 0.95);border: 3px solid #8a2be2;border-radius: 20px;padding: 40px;box-shadow: 0 0 40px rgba(138, 43, 226, 0.6);text-align: center;}
+    .start-title {font-size: 56px;color: #d946ef;text-shadow: 0 0 20px rgba(217, 70, 239, 0.8);margin-bottom: 20px;}
+    .start-subtitle {font-size: 20px;color: #a855f7;margin-bottom: 20px;}
+    .seed-input {width: 100%;padding: 10px;margin-bottom: 20px;border: 2px solid #8a2be2;border-radius: 10px;background: rgba(138, 43, 226, 0.2);color: #fff;font-size: 16px;text-align: center;}
+    .seed-label {color: #a855f7;margin-bottom: 10px;font-size: 14px;}
+    .quick-info {text-align: left;background: rgba(138, 43, 226, 0.2);padding: 20px;border-radius: 10px;margin-bottom: 30px;}
+    .info-line {display: flex;justify-content: space-between;align-items: center;padding: 8px 0;border-bottom: 1px solid rgba(138, 43, 226, 0.3);}
+    .info-line:last-child {border-bottom: none;}
+    .info-label {color: #d946ef;font-weight: bold;}
+    .info-value {color: #fff;}
+    .start-button {width: 100%;padding: 20px;font-size: 28px;font-weight: bold;color: white;background: linear-gradient(135deg, #8a2be2 0%, #d946ef 100%);border: none;border-radius: 15px;cursor: pointer;transition: all 0.3s;box-shadow: 0 5px 20px rgba(138, 43, 226, 0.5);}
+    .start-button:hover {transform: translateY(-3px);box-shadow: 0 8px 30px rgba(138, 43, 226, 0.8);}
+    @media (max-width: 768px) {.start-title {font-size: 42px;}.start-subtitle {font-size: 16px;}.start-container {padding: 25px;}.start-button {font-size: 22px;padding: 15px;}}
+    #gameCanvas {border: 3px solid #4a148c;box-shadow: 0 0 20px rgba(138, 43, 226, 0.5);image-rendering: pixelated;image-rendering: crisp-edges;}
+    #ui {position: absolute;top: 10px;left: 10px;background: rgba(0, 0, 0, 0.7);padding: 15px;border-radius: 8px;border: 2px solid #8a2be2;}
+    #controls {position: absolute;bottom: 20px;right: 20px;display: none;}
+    #attackControls {position: absolute;bottom: 20px;left: 20px;display: none;gap: 10px;}
+    .control-btn, .attack-btn {width: 60px;height: 60px;background: rgba(138, 43, 226, 0.6);border: 2px solid #8a2be2;border-radius: 50%;color: white;font-size: 18px;display: flex;align-items: center;justify-content: center;cursor: pointer;user-select: none;touch-action: none;flex-direction: column;font-weight: bold;}
+    .attack-btn {background: rgba(255, 69, 0, 0.6);border-color: #ff4500;}
+    .control-btn:active, .attack-btn:active {background: rgba(138, 43, 226, 0.9);}
+    .attack-btn:active {background: rgba(255, 69, 0, 0.9);}
+    .attack-btn small {font-size: 10px;}
+    #dpad {display: grid;grid-template-columns: repeat(3, 60px);grid-template-rows: repeat(3, 60px);gap: 5px;}
+    #attackButtons {display: flex;gap: 10px;}
+    .hearts {color: #ff0066;font-size: 20px;margin: 5px 0;}
+    .amethyst {color: #a855f7;font-size: 18px;margin: 5px 0;}
+    #actionPrompt {position: absolute;background: rgba(138, 43, 226, 0.9);color: #fff;padding: 10px 20px;border-radius: 10px;border: 2px solid #d946ef;font-size: 18px;font-weight: bold;pointer-events: none;display: none;box-shadow: 0 0 20px rgba(138, 43, 226, 0.8);}
+    @media (max-width: 768px) {#controls {display: block;}#attackControls {display: block;}}
+</style>
+</head>
+<body>
+<div id="startScreen">
+    <div class="start-container">
+        <h1 class="start-title">&#127776;Путешествие в бездну</h1>
+
+        <div class="seed-label">&#x1F3B2; Сид генерации мира (необязательно)</div>
+        <input type="text" id="seedInput" class="seed-input" placeholder="Введи число или оставь пустым">
+
+        <div class="quick-info">
+            <div class="info-line">
+                <span class="info-label">Управление:</span>
+                <span class="info-value">WASD</span>
+            </div>
+            <div class="info-line">
+                <span class="info-label">Атака (Q):</span>
+                <span class="info-value">1 &#128142;</span>
+            </div>
+            <div class="info-line">
+                <span class="info-label">Самонаводка (E):</span>
+                <span class="info-value">3 &#128142;</span>
+            </div>
+            <div class="info-line">
+                <span class="info-label">Действие (F):</span>
+                <span class="info-value">Активация</span>
+            </div>
+            <div class="info-line">
+                <span class="info-label">Восст. HP:</span>
+                <span class="info-value">13 &#128142;</span>
+            </div>
+        </div>
+
+        <button class="start-button" onclick="startGame()">&#9654; НАЧАТЬ ИГРУ</button>
+    </div>
+</div>
+
+<canvas id="gameCanvas" style="display: none;"></canvas>
+
+<div id="ui" style="display: none;">
+    <div class="hearts">&#9829;<span id="lives">3</span>/7</div>
+    <div class="amethyst">&#128142;<span id="amethysts">3</span></div>
+</div>
+
+<div id="actionPrompt">Нажми F</div>
+
+<div id="controls">
+    <div id="dpad">
+        <div></div>
+        <div class="control-btn" data-key="w">▲</div>
+        <div></div>
+        <div class="control-btn" data-key="a">◄</div>
+        <div></div>
+        <div class="control-btn" data-key="d">►</div>
+        <div></div>
+        <div class="control-btn" data-key="s">▼</div>
+        <div></div>
+    </div>
+</div>
+
+<div id="attackControls">
+    <div id="attackButtons">
+        <div class="attack-btn" data-attack="q">
+            Q<br><small>1&#128142;</small>
+        </div>
+        <div class="attack-btn" data-attack="e">
+            E<br><small>3&#128142;</small>
+        </div>
+        <div class="attack-btn" data-attack="f">
+            F<br><small>Акт.</small>
+        </div>
+    </div>
+</div>
+
+<script>
+    const TILE_SIZE = 32;
+    const VIEW_WIDTH = 25;
+    const VIEW_HEIGHT = 18;
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = TILE_SIZE * VIEW_WIDTH;
+    canvas.height = TILE_SIZE * VIEW_HEIGHT;
+
+    const TILES = {
+        VOID: 0,
+        GROUND: 1,
+        TREE: 2,
+        ROOT: 3,
+        AMETHYST: 4,
+        HOUSE: 5,
+        CASTLE_WALL: 6,
+        CASTLE_TOWER: 7,
+        CASTLE_RUINS: 8,
+        BIG_AMETHYST: 9,
+        MEDIUM_AMETHYST: 10,
+        HUGE_AMETHYST: 11,
+        SHELTER_ROOF: 12,
+        SHELTER_STICK: 13,
+        SHRINE: 14,
+        MAGIC_TILE: 15,
+        MAZE_WALL: 16
+    };
+
+    const TILE_LAYERS = {
+        [TILES.VOID]: 0,
+        [TILES.GROUND]: 1,
+        [TILES.ROOT]: 1,
+        [TILES.TREE]: 2,
+        [TILES.AMETHYST]: 2,
+        [TILES.MEDIUM_AMETHYST]: 2,
+        [TILES.BIG_AMETHYST]: 2,
+        [TILES.HUGE_AMETHYST]: 2,
+        [TILES.SHRINE]: 2,
+        [TILES.HOUSE]: 3,
+        [TILES.CASTLE_WALL]: 3,
+        [TILES.CASTLE_TOWER]: 3,
+        [TILES.CASTLE_RUINS]: 3,
+        [TILES.SHELTER_ROOF]: 3,
+        [TILES.SHELTER_STICK]: 3,
+        [TILES.MAGIC_TILE]: 3,
+        [TILES.MAZE_WALL]: 3
+    };
+
+    const game = {
+        player: {
+            x: 0,
+            y: 0,
+            displayX: 0,
+            displayY: 0,
+            targetX: 0,
+            targetY: 0,
+            isMoving: false,
+            moveProgress: 0,
+            spawnX: 0,
+            spawnY: 0,
+            lives: 3,
+            maxLives: 7,
+            amethysts: 3
+        },
+        camera: {
+            x: 0,
+            y: 0,
+            displayX: 0,
+            displayY: 0
+        },
+        keys: {},
+        map: new Map(),
+        islands: [],
+        enemies: [],
+        kings: [],
+        archers: [],
+        mages: [],
+        archerChiefs: [],
+        projectiles: [],
+        playerProjectiles: [],
+        droppedItems: [],
+        shrines: [],
+        magicTiles: [],
+        
+        generatedChunks: new Set(),
+        lastFrameTime: Date.now(),
+        nearestInteractable: null
+    };
+
+    class DroppedItem {
+        constructor(x, y, type) {
+            this.x = x;
+            this.y = y;
+            this.type = type;
+            this.active = true;
+        }
+    }
+
+    class PlayerProjectile {
+        constructor(x, y, dirX, dirY, isHoming = false) {
+            this.x = x;
+            this.y = y;
+            this.vx = dirX * 0.2;
+            this.vy = dirY * 0.2;
+            this.isHoming = isHoming;
+            this.active = true;
+            this.lifetime = 5000;
+            this.speed = 0.2;
+        }
+
+        update(deltaTime) {
+            if (this.isHoming) {
+                let closestEnemy = null;
+                let minDist = Infinity;
+
+                for (const enemy of [...game.enemies, ...game.kings, ...game.archers, ...game.mages, ...game.archerChiefs]) {
+                    if (!enemy.active) continue;
+                    const dist = Math.sqrt(
+                        Math.pow(enemy.x - this.x, 2) + 
+                        Math.pow(enemy.y - this.y, 2)
+                    );
+                    if (dist < minDist) {
+                        minDist = dist;
+                        closestEnemy = enemy;
+                    }
+                }
+
+                if (closestEnemy) {
+                    const dx = closestEnemy.x - this.x;
+                    const dy = closestEnemy.y - this.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist > 0) {
+                        const targetVx = (dx / dist) * this.speed;
+                        const targetVy = (dy / dist) * this.speed;
+                        this.vx += (targetVx - this.vx) * 0.1;
+                        this.vy += (targetVy - this.vy) * 0.1;
+                    }
+                }
+            }
+
+            this.x += this.vx;
+            this.y += this.vy;
+
+            this.lifetime -= deltaTime * 1000;
+            if (this.lifetime <= 0) {
+                this.active = false;
+            }
+
+            for (const enemy of [...game.enemies, ...game.kings, ...game.archers, ...game.mages, ...game.archerChiefs]) {
+                if (!enemy.active) continue;
+                const dist = Math.sqrt(
+                    Math.pow(enemy.x - this.x, 2) + 
+                    Math.pow(enemy.y - this.y, 2)
+                );
+                if (dist < 0.5) {
+                    this.active = false;
+                    if (enemy.takeDamage) {
+                        enemy.takeDamage();
+                    } else {
+                        if (enemy.onDeath) enemy.onDeath();
+                        enemy.active = false;
+                    }
+                    break;
+                }
+            }
+
+            const tile = getTile(Math.floor(this.x), Math.floor(this.y));
+            if ([TILES.TREE, TILES.HOUSE, TILES.CASTLE_WALL, TILES.CASTLE_TOWER, 
+                 TILES.SHELTER_ROOF, TILES.SHELTER_STICK, TILES.MAZE_WALL].includes(tile)) {
+                this.active = false;
+            }
+        }
+    }
+
+    class Enemy {
+        constructor(x, y) {
+            this.x = x;
+            this.y = y;
+            this.displayX = x;
+            this.displayY = y;
+            this.targetX = x;
+            this.targetY = y;
+            this.isMoving = false;
+            this.moveProgress = 0;
+            this.shootCooldown = 0;
+            this.shootInterval = 2000;
+            this.active = true;
+            this.moveCooldown = 0;
+        }
+
+        onDeath() {
+            if (rng.next() < 0.3) {
+                const roll = rng.next();
+                let type;
+                if (roll < 0.60) {
+                    type = TILES.AMETHYST;
+                } else if (roll < 0.95) {
+                    type = TILES.MEDIUM_AMETHYST;
+                } else {
+                    type = TILES.BIG_AMETHYST;
+                }
+                game.droppedItems.push(new DroppedItem(this.x, this.y, type));
+            }
+        }
+
+        canSeePlayer() {
+            const dx = game.player.x - this.x;
+            const dy = game.player.y - this.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance > 15) return false;
+
+            const steps = Math.ceil(distance);
+            for (let i = 1; i < steps; i++) {
+                const t = i / steps;
+                const checkX = Math.floor(this.x + dx * t);
+                const checkY = Math.floor(this.y + dy * t);
+                const tile = getTile(checkX, checkY);
+
+                if ([TILES.TREE, TILES.HOUSE, TILES.CASTLE_WALL, TILES.CASTLE_TOWER, 
+                     TILES.SHELTER_STICK, TILES.MAZE_WALL].includes(tile)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        update(deltaTime) {
+            if (!this.active) return;
+
+            this.displayX += (this.x - this.displayX) * 0.1;
+            this.displayY += (this.y - this.displayY) * 0.1;
+
+            if (this.canSeePlayer() && !this.isMoving) {
+                this.moveCooldown -= deltaTime * 1000;
+
+                if (this.moveCooldown <= 0) {
+                    const dx = game.player.x - this.x;
+                    const dy = game.player.y - this.y;
+
+                    let moveX = 0;
+                    let moveY = 0;
+
+                    if (Math.abs(dx) > Math.abs(dy)) {
+                        moveX = dx > 0 ? 1 : -1;
+                    } else {
+                        moveY = dy > 0 ? 1 : -1;
+                    }
+
+                    const newX = this.x + moveX;
+                    const newY = this.y + moveY;
+
+                    const targetTile = getTile(newX, newY);
+                    if (targetTile === TILES.VOID) {
+                        this.active = false;
+                    } else if (canMove(newX, newY)) {
+                        this.targetX = newX;
+                        this.targetY = newY;
+                        this.isMoving = true;
+                        this.moveProgress = 0;
+                    }
+
+                    this.moveCooldown = 300;
+                }
+            }
+
+            if (this.isMoving) {
+                this.moveProgress += deltaTime * 5;
+                if (this.moveProgress >= 1) {
+                    this.x = this.targetX;
+                    this.y = this.targetY;
+                    this.isMoving = false;
+
+                    if (getTile(this.x, this.y) === TILES.VOID) {
+                        this.active = false;
+                    }
+                }
+            }
+
+            this.shootCooldown -= deltaTime * 1000;
+            if (this.shootCooldown <= 0 && this.canSeePlayer()) {
+                this.shoot();
+                this.shootCooldown = this.shootInterval;
+            }
+        }
+
+        shoot() {
+            const dx = game.player.x - this.x;
+            const dy = game.player.y - this.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance > 0 && distance < 15) {
+                const speed = 0.15;
+                const vx = (dx / distance) * speed;
+                const vy = (dy / distance) * speed;
+
+                game.projectiles.push(new Projectile(this.x, this.y, vx, vy));
+            }
+        }
+    }
+
+    class King {
+        constructor(x, y) {
+            this.x = x;
+            this.y = y;
+            this.displayX = x;
+            this.displayY = y;
+            this.targetX = x;
+            this.targetY = y;
+            this.isMoving = false;
+            this.moveProgress = 0;
+            this.shootCooldown = 0;
+            this.shootInterval = 2000;
+            this.active = true;
+            this.moveCooldown = 0;
+            this.hp = 3;
+        }
+
+        takeDamage() {
+            this.hp--;
+
+            if (this.hp > 0 && rng.next() < 0.3) {
+                this.summonWarrior();
+            }
+
+            if (this.hp <= 0) {
+                this.onDeath();
+                this.active = false;
+            }
+        }
+
+        summonWarrior() {
+            for (let attempt = 0; attempt < 20; attempt++) {
+                const dx = rng.range(-2, 2);
+                const dy = rng.range(-2, 2);
+                const newX = this.x + dx;
+                const newY = this.y + dy;
+
+                if (canMove(newX, newY) && getTile(newX, newY) === TILES.GROUND) {
+                    game.enemies.push(new Enemy(newX, newY));
+                    break;
+                }
+            }
+        }
+
+        onDeath() {
+            game.droppedItems.push(new DroppedItem(this.x, this.y, TILES.HUGE_AMETHYST));
+        }
+
+        canSeePlayer() {
+            return new Enemy(this.x, this.y).canSeePlayer();
+        }
+
+        update(deltaTime) {
+            if (!this.active) return;
+
+            this.displayX += (this.x - this.displayX) * 0.1;
+            this.displayY += (this.y - this.displayY) * 0.1;
+
+            if (this.canSeePlayer() && !this.isMoving) {
+                this.moveCooldown -= deltaTime * 1000;
+
+                if (this.moveCooldown <= 0) {
+                    const dx = game.player.x - this.x;
+                    const dy = game.player.y - this.y;
+
+                    let moveX = 0;
+                    let moveY = 0;
+
+                    if (Math.abs(dx) > Math.abs(dy)) {
+                        moveX = dx > 0 ? 1 : -1;
+                    } else {
+                        moveY = dy > 0 ? 1 : -1;
+                    }
+
+                    const newX = this.x + moveX;
+                    const newY = this.y + moveY;
+
+                    const targetTile = getTile(newX, newY);
+                    if (targetTile === TILES.VOID) {
+                        this.active = false;
+                    } else if (canMove(newX, newY)) {
+                        this.targetX = newX;
+                        this.targetY = newY;
+                        this.isMoving = true;
+                        this.moveProgress = 0;
+                    }
+                    this.moveCooldown = 500;
+                }
+            }
+
+            if (this.isMoving) {
+                this.moveProgress += deltaTime * 4;
+                if (this.moveProgress >= 1) {
+                    this.x = this.targetX;
+                    this.y = this.targetY;
+                    this.isMoving = false;
+
+                    if (getTile(this.x, this.y) === TILES.VOID) {
+                        this.active = false;
+                    }
+                }
+            }
+
+            this.shootCooldown -= deltaTime * 1000;
+            if (this.shootCooldown <= 0 && this.canSeePlayer()) {
+                const dx = game.player.x - this.x;
+                const dy = game.player.y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance > 0 && distance < 15) {
+                    const speed = 0.15;
+                    const vx = (dx / distance) * speed;
+                    const vy = (dy / distance) * speed;
+
+                    game.projectiles.push(new Projectile(this.x, this.y, vx, vy));
+                }
+
+                this.shootCooldown = this.shootInterval;
+            }
+        }
+    }
+
+    class Archer {
+        constructor(x, y) {
+            this.x = x;
+            this.y = y;
+            this.displayX = x;
+            this.displayY = y;
+            this.shootCooldown = 0;
+            this.shootInterval = 2500;
+            this.active = true;
+            this.hp = 1;
+        }
+
+        onDeath() {
+            if (rng.next() < 0.3) {
+                const roll = rng.next();
+                let type;
+                if (roll < 0.60) {
+                    type = TILES.AMETHYST;
+                } else if (roll < 0.95) {
+                    type = TILES.MEDIUM_AMETHYST;
+                } else {
+                    type = TILES.BIG_AMETHYST;
+                }
+                game.droppedItems.push(new DroppedItem(this.x, this.y, type));
+            }
+        }
+
+        takeDamage() {
+            this.hp--;
+            if (this.hp <= 0) {
+                this.onDeath();
+                this.active = false;
+            }
+        }
+
+        canSeePlayer() {
+            return new Enemy(this.x, this.y).canSeePlayer();
+        }
+
+        update(deltaTime) {
+            if (!this.active) return;
+
+            this.shootCooldown -= deltaTime * 1000;
+            if (this.shootCooldown <= 0 && this.canSeePlayer()) {
+                const dx = game.player.x - this.x;
+                const dy = game.player.y - this.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance > 0 && distance < 15) {
+                    const speed = 0.25;
+                    const vx = (dx / distance) * speed;
+                    const vy = (dy / distance) * speed;
+
+                    game.projectiles.push(new Projectile(this.x, this.y, vx, vy));
+                    this.shootCooldown = this.shootInterval;
+                }
+            }
+        }
+    }
+
+    class Mage {
+        constructor(x, y) {
+            this.x = x;
+            this.y = y;
+            this.displayX = x;
+            this.displayY = y;
+            this.targetX = x;
+            this.targetY = y;
+            this.isMoving = false;
+            this.moveProgress = 0;
+            this.shootCooldown = 0;
+            this.shootInterval = 3000;
+            this.active = true;
+            this.moveCooldown = 0;
+            this.hp = 2;
+        }
+
+        onDeath() {
+            if (rng.next() < 0.75) {
+                const type = rng.next() < 0.5 ? TILES.BIG_AMETHYST : TILES.HUGE_AMETHYST;
+                game.droppedItems.push(new DroppedItem(this.x, this.y, type));
+            }
+        }
+
+        takeDamage() {
+            this.hp--;
+            if (this.hp <= 0) {
+                this.onDeath();
+                this.active = false;
+            }
+        }
+
+        canSeePlayer() {
+            return new Enemy(this.x, this.y).canSeePlayer();
+        }
+
+        update(deltaTime) {
+            if (!this.active) return;
+
+            this.displayX += (this.x - this.displayX) * 0.1;
+            this.displayY += (this.y - this.displayY) * 0.1;
+
+            if (this.canSeePlayer() && !this.isMoving) {
+                this.moveCooldown -= deltaTime * 1000;
+
+                if (this.moveCooldown <= 0) {
+                    const dx = game.player.x - this.x;
+                    const dy = game.player.y - this.y;
+
+                    let moveX = 0;
+                    let moveY = 0;
+
+                    if (Math.abs(dx) > Math.abs(dy)) {
+                        moveX = dx > 0 ? 1 : -1;
+                    } else {
+                        moveY = dy > 0 ? 1 : -1;
+                    }
+
+                    const newX = this.x + moveX;
+                    const newY = this.y + moveY;
+
+                    const targetTile = getTile(newX, newY);
+                    if (targetTile === TILES.VOID) {
+                        this.active = false;
+                    } else if (canMove(newX, newY)) {
+                        this.targetX = newX;
+                        this.targetY = newY;
+                        this.isMoving = true;
+                        this.moveProgress = 0;
+                    }
+
+                    this.moveCooldown = 400;
+                }
+            }
+
+            if (this.isMoving) {
+                this.moveProgress += deltaTime * 4.5;
+                if (this.moveProgress >= 1) {
+                    this.x = this.targetX;
+                    this.y = this.targetY;
+                    this.isMoving = false;
+
+                    if (getTile(this.x, this.y) === TILES.VOID) {
+                        this.active = false;
+                    }
+                }
+            }
+
+            this.shootCooldown -= deltaTime * 1000;
+            if (this.shootCooldown <= 0 && this.canSeePlayer()) {
+                game.projectiles.push(new HomingProjectile(this.x, this.y));
+                this.shootCooldown = this.shootInterval;
+            }
+        }
+    }
+
+    class ArcherChief {
+        constructor(x, y) {
+            this.x = x;
+            this.y = y;
+            this.displayX = x;
+            this.displayY = y;
+            this.active = true;
+            this.hp = 3;
+            this.spawnCooldown = 0;
+            this.spawnInterval = 4000;
+        }
+
+        onDeath() {
+            game.droppedItems.push(new DroppedItem(this.x, this.y, TILES.HUGE_AMETHYST));
+            game.droppedItems.push(new DroppedItem(this.x + 0.5, this.y, TILES.BIG_AMETHYST));
+        }
+
+        takeDamage() {
+            this.hp--;
+            if (this.hp <= 0) {
+                this.onDeath();
+                this.active = false;
+            }
+        }
+
+        update(deltaTime) {
+            if (!this.active) return;
+
+            this.spawnCooldown -= deltaTime * 1000;
+            if (this.spawnCooldown <= 0) {
+                for (let attempt = 0; attempt < 20; attempt++) {
+                    const dx = rng.range(-3, 3);
+                    const dy = rng.range(-3, 3);
+                    const newX = this.x + dx;
+                    const newY = this.y + dy;
+
+                    if (getTile(newX, newY) === TILES.GROUND && canMove(newX, newY)) {
+                        game.archers.push(new Archer(newX, newY));
+                        this.spawnCooldown = this.spawnInterval;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    class Projectile {
+        constructor(x, y, vx, vy) {
+            this.x = x;
+            this.y = y;
+            this.vx = vx;
+            this.vy = vy;
+            this.active = true;
+            this.lifetime = 5000;
+        }
+
+        update(deltaTime) {
+            this.x += this.vx;
+            this.y += this.vy;
+
+            this.lifetime -= deltaTime * 1000;
+            if (this.lifetime <= 0) {
+                this.active = false;
+            }
+
+            const distToPlayer = Math.sqrt(
+                Math.pow(this.x - game.player.displayX, 2) + 
+                Math.pow(this.y - game.player.displayY, 2)
+            );
+
+            if (distToPlayer < 0.5) {
+                this.active = false;
+                game.player.lives--;
+
+                if (game.player.lives < 0) {
+                    game.player.lives = 0;
+                }
+                updateUI();
+
+                if (game.player.lives <= 0) {
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                }
+            }
+
+            const tile = getTile(Math.floor(this.x), Math.floor(this.y));
+            if ([TILES.TREE, TILES.HOUSE, TILES.CASTLE_WALL, TILES.CASTLE_TOWER, 
+                 TILES.SHELTER_ROOF, TILES.MAZE_WALL].includes(tile)) {
+                this.active = false;
+            }
+        }
+    }
+
+    class HomingProjectile {
+        constructor(x, y) {
+            this.x = x;
+            this.y = y;
+            this.vx = 0;
+            this.vy = -0.1;
+            this.active = true;
+            this.lifetime = 8000;
+            this.speed = 0.1;
+        }
+
+        update(deltaTime) {
+            const dx = game.player.x - this.x;
+            const dy = game.player.y - this.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance > 0) {
+                const targetVx = (dx / distance) * this.speed;
+                const targetVy = (dy / distance) * this.speed;
+                this.vx += (targetVx - this.vx) * 0.05;
+                this.vy += (targetVy - this.vy) * 0.05;
+            }
+
+            this.x += this.vx;
+            this.y += this.vy;
+
+            this.lifetime -= deltaTime * 1000;
+            if (this.lifetime <= 0) {
+                this.active = false;
+            }
+
+            const distToPlayer = Math.sqrt(
+                Math.pow(this.x - game.player.displayX, 2) + 
+                Math.pow(this.y - game.player.displayY, 2)
+            );
+
+            if (distToPlayer < 0.5) {
+                this.active = false;
+                game.player.lives--;
+
+                if (game.player.lives < 0) {
+                    game.player.lives = 0;
+                }
+                updateUI();
+
+                if (game.player.lives <= 0) {
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                }
+            }
+
+            const tile = getTile(Math.floor(this.x), Math.floor(this.y));
+            if ([TILES.TREE, TILES.HOUSE, TILES.CASTLE_WALL, TILES.CASTLE_TOWER, 
+                 TILES.SHELTER_ROOF, TILES.MAZE_WALL].includes(tile)) {
+                this.active = false;
+            }
+        }
+    }
+
+    class Random {
+        constructor(seed) {
+            this.seed = seed;
+        }
+
+        next() {
+            this.seed = (this.seed * 9301 + 49297) % 233280;
+            return this.seed / 233280;
+        }
+
+        range(min, max) {
+            return Math.floor(this.next() * (max - min + 1)) + min;
+        }
+    }
+    let rng;
+
+    function getTile(x, y) {
+        const key = `${x},${y}`;
+        return game.map.get(key) || TILES.VOID;
+    }
+
+    function setTile(x, y, type) {
+        const key = `${x},${y}`;
+        game.map.set(key, type);
+    }
+
+
+    function generateShrine(centerX, centerY) {
+        if (getTile(centerX, centerY) !== TILES.GROUND || 
+            getTile(centerX, centerY + 1) !== TILES.GROUND) {
+            return false;
+        }
+
+        setTile(centerX, centerY, TILES.SHRINE);
+        setTile(centerX, centerY + 1, TILES.SHRINE);
+        game.shrines.push({ x: centerX, y: centerY, activated: false });
+
+        return true;
+    }
+
+    function generateMaze(centerX, centerY, size) {
+        const s = size || rng.range(5, 8);
+
+        for (let dy = -s; dy <= s; dy++) {
+            for (let dx = -s; dx <= s; dx++) {
+                if (getTile(centerX + dx, centerY + dy) !== TILES.GROUND) {
+                    return false;
+                }
+            }
+        }
+
+        for (let dy = -s; dy <= s; dy++) {
+            for (let dx = -s; dx <= s; dx++) {
+                if (Math.abs(dx) === s || Math.abs(dy) === s) {
+                    if ((dx === s && dy === 0) || (dx === 0 && dy === s)) {
+                        continue;
+                    }
+                    setTile(centerX + dx, centerY + dy, TILES.MAZE_WALL);
+                }
+            }
+        }
+
+        for (let i = 0; i < s * 2; i++) {
+            const x = centerX + rng.range(-s + 1, s - 1);
+            const y = centerY + rng.range(-s + 1, s - 1);
+            if (getTile(x, y) === TILES.GROUND) {
+                setTile(x, y, TILES.MAZE_WALL);
+            }
+        }
+
+        for (let i = 0; i < 3; i++) {
+            const x = centerX + rng.range(-s + 1, s - 1);
+            const y = centerY + rng.range(-s + 1, s - 1);
+
+            if (getTile(x, y) === TILES.GROUND) {
+                const roll = rng.next();
+                if (roll < 0.3) {
+                    setTile(x, y, TILES.HUGE_AMETHYST);
+                } else if (roll < 0.6) {
+                    setTile(x, y, TILES.BIG_AMETHYST);
+                } else {
+                    setTile(x, y, TILES.MAGIC_TILE);
+                    game.magicTiles.push({ x, y, used: false });
+                }
+            }
+        }
+
+        return true;
+    }
+
+    function generateShelter(centerX, centerY) {
+        for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 0; dx++) {
+                if (getTile(centerX + dx, centerY + dy) !== TILES.GROUND) {
+                    return false;
+                }
+            }
+        }
+
+        setTile(centerX - 1, centerY - 1, TILES.SHELTER_ROOF);
+        setTile(centerX, centerY - 1, TILES.SHELTER_ROOF);
+        setTile(centerX - 1, centerY, TILES.SHELTER_STICK);
+        setTile(centerX, centerY, TILES.SHELTER_STICK);
+
+        for (let attempt = 0; attempt < 10; attempt++) {
+            const dx = rng.range(-3, 3);
+            const dy = rng.range(-3, 3);
+            if (getTile(centerX + dx, centerY + dy) === TILES.GROUND) {
+                setTile(centerX + dx, centerY + dy, TILES.MEDIUM_AMETHYST);
+                break;
+            }
+        }
+
+        return true;
+    }
+
+    function generateHouse(centerX, centerY) {
+        for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 1; dx++) {
+                if (getTile(centerX + dx, centerY + dy) !== TILES.GROUND) {
+                    return false;
+                }
+            }
+        }
+
+        for (let dy = -1; dy <= 1; dy++) {
+            for (let dx = -1; dx <= 1; dx++) {
+                if (dy === 1 && dx === 0) {
+                    continue;
+                }
+                setTile(centerX + dx, centerY + dy, TILES.HOUSE);
+            }
+        }
+
+        return true;
+    }
+
+    function generateCastle(centerX, centerY) {
+        const size = 3;
+
+        for (let dy = -size; dy <= size; dy++) {
+            for (let dx = -size; dx <= size; dx++) {
+                if (getTile(centerX + dx, centerY + dy) !== TILES.GROUND) {
+                    return false;
+                }
+            }
+        }
+
+        for (let dy = -size; dy <= size; dy++) {
+            for (let dx = -size; dx <= size; dx++) {
+                if (Math.abs(dx) === size && Math.abs(dy) === size) {
+                    setTile(centerX + dx, centerY + dy, TILES.CASTLE_TOWER);
+                } else if (Math.abs(dx) === size || Math.abs(dy) === size) {
+                    if ((dy === 0 && dx === size) || (dy === size && dx === 0)) {
+                        continue;
+                    }
+                    setTile(centerX + dx, centerY + dy, TILES.CASTLE_WALL);
+                } else if (rng.next() < 0.3) {
+                    setTile(centerX + dx, centerY + dy, TILES.CASTLE_RUINS);
+                }
+            }
+        }
+
+        let placedCount = 0;
+        for (let attempt = 0; attempt < 30 && placedCount < 3; attempt++) {
+            const dx = rng.range(-2, 2);
+            const dy = rng.range(-2, 2);
+            if (getTile(centerX + dx, centerY + dy) === TILES.GROUND) {
+                setTile(centerX + dx, centerY + dy, TILES.MEDIUM_AMETHYST);
+                placedCount++;
+            }
+        }
+
+        return true;
+    }
+
+    function generateIsland(centerX, centerY, size, isMainIsland = false) {
+        const island = {
+            tiles: [],
+            centerX,
+            centerY,
+            size,
+            isMain: isMainIsland
+        };
+
+        const radiusX = size + rng.range(2, 5);
+        const radiusY = size + rng.range(2, 5);
+
+        for (let dy = -radiusY; dy <= radiusY; dy++) {
+            for (let dx = -radiusX; dx <= radiusX; dx++) {
+                const dist = Math.sqrt((dx / radiusX) ** 2 + (dy / radiusY) ** 2);
+                if (dist <= 1 + rng.next() * 0.3) {
+                    const x = centerX + dx;
+                    const y = centerY + dy;
+                    setTile(x, y, TILES.GROUND);
+                    island.tiles.push({ x, y });
+                }
+            }
+        }
+
+        const treeCount = isMainIsland ? size * 3 : size * 2;
+        for (let i = 0; i < treeCount; i++) {
+            const tile = island.tiles[rng.range(0, island.tiles.length - 1)];
+            if (tile && getTile(tile.x, tile.y) === TILES.GROUND) {
+                setTile(tile.x, tile.y, TILES.TREE);
+            }
+        }
+
+        for (let i = 0; i < rng.range(2, 5); i++) {
+            const tile = island.tiles[rng.range(0, island.tiles.length - 1)];
+            if (tile && getTile(tile.x, tile.y) === TILES.GROUND) {
+                setTile(tile.x, tile.y, TILES.AMETHYST);
+            }
+        }
+
+        for (let i = 0; i < rng.range(0, 2); i++) {
+            const tile = island.tiles[rng.range(0, island.tiles.length - 1)];
+            if (tile && getTile(tile.x, tile.y) === TILES.GROUND) {
+                setTile(tile.x, tile.y, TILES.MEDIUM_AMETHYST);
+            }
+        }
+
+        if (size >= 8 && rng.next() < 0.3) {
+            for (let attempt = 0; attempt < 20; attempt++) {
+                const tile = island.tiles[rng.range(0, island.tiles.length - 1)];
+                if (tile && getTile(tile.x, tile.y) === TILES.GROUND) {
+                    setTile(tile.x, tile.y, TILES.BIG_AMETHYST);
+                    break;
+                }
+            }
+        }
+
+        if (size >= 8 && rng.next() < 0.01) {
+            for (let attempt = 0; attempt < 20; attempt++) {
+                const tile = island.tiles[rng.range(0, island.tiles.length - 1)];
+                if (tile && getTile(tile.x, tile.y) === TILES.GROUND) {
+                    setTile(tile.x, tile.y, TILES.HUGE_AMETHYST);
+                    break;
+                }
+            }
+        }
+
+        if (size >= 8) {
+            const castleChance = isMainIsland ? 0.15 : 0.05;
+            if (rng.next() < castleChance) {
+                for (let attempt = 0; attempt < 10; attempt++) {
+                    const tile = island.tiles[rng.range(0, island.tiles.length - 1)];
+                    if (tile && generateCastle(tile.x, tile.y)) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        const houseChance = isMainIsland ? 0.03 : 0.01;
+        if (rng.next() < houseChance) {
+            for (let attempt = 0; attempt < 20; attempt++) {
+                const tile = island.tiles[rng.range(0, island.tiles.length - 1)];
+                if (tile && generateHouse(tile.x, tile.y)) {
+                    break;
+                }
+            }
+        }
+
+        const shelterChance = isMainIsland ? 0.05 : 0.03;
+        if (rng.next() < shelterChance) {
+            for (let attempt = 0; attempt < 20; attempt++) {
+                const tile = island.tiles[rng.range(0, island.tiles.length - 1)];
+                if (tile && generateShelter(tile.x, tile.y)) {
+                    break;
+                }
+            }
+        }
+
+        if (size >= 10 && rng.next() < 0.08) {
+            for (let attempt = 0; attempt < 5; attempt++) {
+                const tile = island.tiles[rng.range(0, island.tiles.length - 1)];
+                if (tile && generateMaze(tile.x, tile.y)) {
+                    break;
+                }
+            }
+        }
+
+        if (size >= 6 && rng.next() < 0.15) {
+            for (let attempt = 0; attempt < 20; attempt++) {
+                const tile = island.tiles[rng.range(0, island.tiles.length - 1)];
+                if (tile && generateShrine(tile.x, tile.y)) {
+                    break;
+                }
+            }
+        }
+
+        if (!isMainIsland && size >= 8 && rng.next() < 0.05) {
+            const distFromSpawn = Math.sqrt(
+                Math.pow(centerX - game.player.spawnX, 2) + 
+                Math.pow(centerY - game.player.spawnY, 2)
+            );
+
+            if (distFromSpawn > 20) {
+                for (let attempt = 0; attempt < 30; attempt++) {
+                    const tile = island.tiles[rng.range(0, island.tiles.length - 1)];
+                    if (tile && getTile(tile.x, tile.y) === TILES.GROUND) {
+                        game.kings.push(new King(tile.x, tile.y));
+
+                        for (let w = 0; w < rng.range(1, 3); w++) {
+                            for (let j = 0; j < 20; j++) {
+                                const dx = rng.range(-3, 3);
+                                const dy = rng.range(-3, 3);
+                                if (getTile(tile.x + dx, tile.y + dy) === TILES.GROUND && 
+                                    canMove(tile.x + dx, tile.y + dy)) {
+                                    game.enemies.push(new Enemy(tile.x + dx, tile.y + dy));
+                                    break;
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!isMainIsland && size >= 8 && rng.next() < 0.04) {
+            const distFromSpawn = Math.sqrt(
+                Math.pow(centerX - game.player.spawnX, 2) + 
+                Math.pow(centerY - game.player.spawnY, 2)
+            );
+
+            if (distFromSpawn > 20) {
+                for (let attempt = 0; attempt < 30; attempt++) {
+                    const tile = island.tiles[rng.range(0, island.tiles.length - 1)];
+                    if (tile && getTile(tile.x, tile.y) === TILES.GROUND) {
+                        game.archerChiefs.push(new ArcherChief(tile.x, tile.y));
+
+                        for (let w = 0; w < 2; w++) {
+                            for (let j = 0; j < 20; j++) {
+                                const dx = rng.range(-2, 2);
+                                const dy = rng.range(-2, 2);
+                                if (getTile(tile.x + dx, tile.y + dy) === TILES.GROUND && 
+                                    canMove(tile.x + dx, tile.y + dy)) {
+                                    game.archers.push(new Archer(tile.x + dx, tile.y + dy));
+                                    break;
+                                }
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!isMainIsland && size < 6 && rng.next() < 0.3) {
+            const distFromSpawn = Math.sqrt(
+                Math.pow(centerX - game.player.spawnX, 2) + 
+                Math.pow(centerY - game.player.spawnY, 2)
+            );
+
+            if (distFromSpawn > 15) {
+                for (let attempt = 0; attempt < 30; attempt++) {
+                    const tile = island.tiles[rng.range(0, island.tiles.length - 1)];
+                    if (tile && getTile(tile.x, tile.y) === TILES.GROUND) {
+                        game.mages.push(new Mage(tile.x, tile.y));
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!isMainIsland && rng.next() < 0.45) {
+            const distFromSpawn = Math.sqrt(
+                Math.pow(centerX - game.player.spawnX, 2) + 
+                Math.pow(centerY - game.player.spawnY, 2)
+            );
+
+            if (distFromSpawn > 20) {
+                for (let attempt = 0; attempt < 30; attempt++) {
+                    const tile = island.tiles[rng.range(0, island.tiles.length - 1)];
+                    if (tile && getTile(tile.x, tile.y) === TILES.GROUND) {
+                        game.enemies.push(new Enemy(tile.x, tile.y));
+                        break;
+                    }
+                }
+            }
+        }
+
+        return island;
+    }
+
+    function createBridge(island1, island2) {
+        let minDist = Infinity;
+        let point1 = null;
+        let point2 = null;
+
+        for (const t1 of island1.tiles) {
+            for (const t2 of island2.tiles) {
+                const dist = Math.abs(t1.x - t2.x) + Math.abs(t1.y - t2.y);
+                if (dist < minDist) {
+                    minDist = dist;
+                    point1 = t1;
+                    point2 = t2;
+                }
+            }
+        }
+
+        if (!point1 || !point2) return;
+
+        let x = point1.x;
+        let y = point1.y;
+
+        while (x !== point2.x) {
+            setTile(x, y, TILES.ROOT);
+            x += (point2.x > x) ? 1 : -1;
+        }
+
+        while (y !== point2.y) {
+            setTile(x, y, TILES.ROOT);
+            y += (point2.y > y) ? 1 : -1;
+        }
+
+        x = point1.x;
+        y = point1.y;
+
+        while (x !== point2.x) {
+            if (getTile(x, y) === TILES.VOID) setTile(x, y, TILES.ROOT);
+            if (getTile(x, y + 1) === TILES.VOID) setTile(x, y + 1, TILES.ROOT);
+            if (getTile(x, y - 1) === TILES.VOID) setTile(x, y - 1, TILES.ROOT);
+            x += (point2.x > x) ? 1 : -1;
+        }
+
+        while (y !== point2.y) {
+            if (getTile(x, y) === TILES.VOID) setTile(x, y, TILES.ROOT);
+            if (getTile(x + 1, y) === TILES.VOID) setTile(x + 1, y, TILES.ROOT);
+            if (getTile(x - 1, y) === TILES.VOID) setTile(x - 1, y, TILES.ROOT);
+            y += (point2.y > y) ? 1 : -1;
+        }
+    }
+
+    function generateChunk(chunkX, chunkY) {
+        const chunkKey = `${chunkX},${chunkY}`;
+        if (game.generatedChunks.has(chunkKey)) return;
+
+        game.generatedChunks.add(chunkKey);
+
+        const chunkSize = 40;
+        const baseX = chunkX * chunkSize;
+        const baseY = chunkY * chunkSize;
+
+        const islandCount = rng.range(2, 4);
+        const newIslands = [];
+
+        for (let i = 0; i < islandCount; i++) {
+            const x = baseX + rng.range(5, chunkSize - 5);
+            const y = baseY + rng.range(5, chunkSize - 5);
+            const size = rng.range(4, 10);
+            const island = generateIsland(x, y, size);
+            newIslands.push(island);
+        }
+
+        for (let i = 0; i < newIslands.length - 1; i++) {
+            createBridge(newIslands[i], newIslands[i + 1]);
+        }
+
+        if (game.islands.length > 0 && newIslands.length > 0) {
+            const nearestExisting = game.islands[game.islands.length - 1];
+            createBridge(nearestExisting, newIslands[0]);
+        }
+        game.islands.push(...newIslands);
+    }
+
+    function initGame() {
+        const mainIsland = generateIsland(0, 0, 14, true);
+        game.islands.push(mainIsland);
+
+        for (const tile of mainIsland.tiles) {
+            if (getTile(tile.x, tile.y) === TILES.GROUND) {
+                game.player.x = tile.x;
+                game.player.y = tile.y;
+                game.player.displayX = tile.x;
+                game.player.displayY = tile.y;
+                game.player.targetX = tile.x;
+                game.player.targetY = tile.y;
+                game.player.spawnX = tile.x;
+                game.player.spawnY = tile.y;
+                break;
+            }
+        }
+
+        for (let cx = -1; cx <= 1; cx++) {
+            for (let cy = -1; cy <= 1; cy++) {
+                generateChunk(cx, cy);
+            }
+        }
+        updateUI();
+    }
+
+    function checkChunkGeneration() {
+        const chunkSize = 40;
+        const playerChunkX = Math.floor(game.player.x / chunkSize);
+        const playerChunkY = Math.floor(game.player.y / chunkSize);
+
+        for (let cx = playerChunkX - 2; cx <= playerChunkX + 2; cx++) {
+            for (let cy = playerChunkY - 2; cy <= playerChunkY + 2; cy++) {
+                generateChunk(cx, cy);
+            }
+        }
+    }
+
+    function updateUI() {
+        document.getElementById('lives').textContent = game.player.lives;
+        document.getElementById('amethysts').textContent = game.player.amethysts;
+    }
+
+    function canMove(x, y) {
+        const tile = getTile(x, y);
+        return ![TILES.TREE, TILES.HOUSE, TILES.CASTLE_WALL, TILES.CASTLE_TOWER, 
+                 TILES.SHELTER_STICK, TILES.MAZE_WALL].includes(tile);
+    }
+
+    function startPlayerMove(dx, dy) {
+        if (game.player.isMoving) return;
+
+        const newX = game.player.x + dx;
+        const newY = game.player.y + dy;
+
+        if (canMove(newX, newY)) {
+            game.player.targetX = newX;
+            game.player.targetY = newY;
+            game.player.isMoving = true;
+            game.player.moveProgress = 0;
+        }
+    }
+
+    function playerAttackSimple() {
+        if (game.player.amethysts < 1) return;
+
+        game.player.amethysts -= 1;
+        updateUI();
+
+        game.playerProjectiles.push(new PlayerProjectile(
+            game.player.x, 
+            game.player.y, 
+            0, 
+            -1, 
+            false
+        ));
+    }
+
+    function playerAttackHoming() {
+        if (game.player.amethysts < 3) return;
+
+        game.player.amethysts -= 3;
+        updateUI();
+
+        game.playerProjectiles.push(new PlayerProjectile(
+            game.player.x, 
+            game.player.y, 
+            0, 
+            -1, 
+            true
+        ));
+    }
+
+    function playerAction() {
+        const interactable = game.nearestInteractable;
+        if (!interactable) return;
+
+        if (interactable.type === 'shrine') {
+            if (game.player.amethysts >= 20) {
+                game.player.amethysts -= 20;
+                game.player.spawnX = interactable.x;
+                game.player.spawnY = interactable.y;
+                updateUI();
+            }
+        } else if (interactable.type === 'magicTile') {
+            const magicTile = game.magicTiles.find(t => t.x === interactable.x && t.y === interactable.y);
+            if (magicTile && !magicTile.used) {
+                magicTile.used = true;
+                setTile(interactable.x, interactable.y, TILES.GROUND);
+
+                const roll = rng.next();
+                if (roll < 0.1) {
+                    game.player.amethysts += 20;
+                } else if (roll < 0.6) {
+                    const loss = Math.ceil(game.player.lives * 0.5);
+                    game.player.lives -= loss;
+                    if (game.player.lives < 0) game.player.lives = 0;
+
+                    if (game.player.lives <= 0) {
+                        setTimeout(() => location.reload(), 1000);
+                    }
+                }
+                updateUI();
+            }
+        } 
+    }
+
+    function completeMove() {
+        game.player.x = game.player.targetX;
+        game.player.y = game.player.targetY;
+        game.player.displayX = game.player.x;
+        game.player.displayY = game.player.y;
+        game.player.isMoving = false;
+
+        const tile = getTile(game.player.x, game.player.y);
+
+        if (tile === TILES.VOID) {
+            game.player.lives--;
+
+            if (game.player.lives < 0) {
+                game.player.lives = 0;
+            }
+
+            game.player.x = game.player.spawnX;
+            game.player.y = game.player.spawnY;
+            game.player.displayX = game.player.x;
+            game.player.displayY = game.player.y;
+            game.player.targetX = game.player.x;
+            game.player.targetY = game.player.y;
+
+            updateUI();
+
+            if (game.player.lives <= 0) {
+                setTimeout(() => location.reload(), 1000);
+            }
+        }
+
+        if (tile === TILES.AMETHYST) {
+            game.player.amethysts++;
+            setTile(game.player.x, game.player.y, TILES.GROUND);
+            updateUI();
+        }
+
+        if (tile === TILES.MEDIUM_AMETHYST) {
+            game.player.amethysts += 3;
+            setTile(game.player.x, game.player.y, TILES.GROUND);
+            updateUI();
+        }
+
+        if (tile === TILES.BIG_AMETHYST) {
+            game.player.amethysts += 5;
+            setTile(game.player.x, game.player.y, TILES.GROUND);
+            updateUI();
+        }
+
+        if (tile === TILES.HUGE_AMETHYST) {
+            game.player.amethysts += 10;
+            setTile(game.player.x, game.player.y, TILES.GROUND);
+            updateUI();
+        }
+
+        for (let i = game.droppedItems.length - 1; i >= 0; i--) {
+            const item = game.droppedItems[i];
+            if (!item.active) continue;
+
+            const dist = Math.sqrt(
+                Math.pow(item.x - game.player.x, 2) + 
+                Math.pow(item.y - game.player.y, 2)
+            );
+
+            if (dist < 0.5) {
+                if (item.type === TILES.AMETHYST) {
+                    game.player.amethysts += 1;
+                } else if (item.type === TILES.MEDIUM_AMETHYST) {
+                    game.player.amethysts += 3;
+                } else if (item.type === TILES.BIG_AMETHYST) {
+                    game.player.amethysts += 5;
+                } else if (item.type === TILES.HUGE_AMETHYST) {
+                    game.player.amethysts += 10;
+                }
+
+                item.active = false;
+                game.droppedItems.splice(i, 1);
+                updateUI();
+            }
+        }
+
+        if (game.player.amethysts >= 13 && game.player.lives < game.player.maxLives) {
+            game.player.amethysts -= 13;
+            game.player.lives++;
+
+            if (game.player.lives > game.player.maxLives) {
+                game.player.lives = game.player.maxLives;
+            }
+            updateUI();
+        }
+
+        checkChunkGeneration();
+    }
+
+    function updatePlayerMovement(deltaTime) {
+        if (!game.player.isMoving) return;
+
+        const moveSpeed = 6.5;
+        game.player.moveProgress += deltaTime * moveSpeed;
+
+        if (game.player.moveProgress >= 1) {
+            game.player.moveProgress = 1;
+            const t = game.player.moveProgress;
+            game.player.displayX = game.player.x + (game.player.targetX - game.player.x) * t;
+            game.player.displayY = game.player.y + (game.player.targetY - game.player.y) * t;
+
+            completeMove();
+        } else {
+            const t = game.player.moveProgress;
+            game.player.displayX = game.player.x + (game.player.targetX - game.player.x) * t;
+            game.player.displayY = game.player.y + (game.player.targetY - game.player.y) * t;
+        }
+    }
+
+    function checkKeyInput() {
+        if (game.player.isMoving) return;
+
+        if (game.keys['w'] || game.keys['W'] || game.keys['ц'] || game.keys['Ц']) {
+            startPlayerMove(0, -1);
+        } else if (game.keys['s'] || game.keys['S'] || game.keys['ы'] || game.keys['Ы']) {
+            startPlayerMove(0, 1);
+        } else if (game.keys['a'] || game.keys['A'] || game.keys['ф'] || game.keys['Ф']) {
+            startPlayerMove(-1, 0);
+        } else if (game.keys['d'] || game.keys['D'] || game.keys['в'] || game.keys['В']) {
+            startPlayerMove(1, 0);
+        }
+    }
+
+    function checkNearestInteractable() {
+        let nearest = null;
+        let minDist = Infinity;
+
+        for (const shrine of game.shrines) {
+            const dist = Math.sqrt(
+                Math.pow(shrine.x - game.player.x, 2) + 
+                Math.pow(shrine.y - game.player.y, 2)
+            );
+            if (dist <= 1.5 && dist < minDist) {
+                minDist = dist;
+                nearest = { type: 'shrine', x: shrine.x, y: shrine.y };
+            }
+        }
+
+        for (const magicTile of game.magicTiles) {
+            if (magicTile.used) continue;
+            const dist = Math.sqrt(
+                Math.pow(magicTile.x - game.player.x, 2) + 
+                Math.pow(magicTile.y - game.player.y, 2)
+            );
+            if (dist <= 1.5 && dist < minDist) {
+                minDist = dist;
+                nearest = { type: 'magicTile', x: magicTile.x, y: magicTile.y };
+            }
+        }
+
+        game.nearestInteractable = nearest;
+
+        const prompt = document.getElementById('actionPrompt');
+        if (nearest) {
+            const screenX = (nearest.x - game.camera.displayX) * TILE_SIZE;
+            const screenY = (nearest.y - game.camera.displayY) * TILE_SIZE;
+            prompt.style.left = screenX + 'px';
+            prompt.style.top = (screenY - 40) + 'px';
+            prompt.style.display = 'block';
+        } else {
+            prompt.style.display = 'none';
+        }
+    }
+
+    function drawTile(x, y, tile) {
+        const screenX = (x - game.camera.displayX) * TILE_SIZE;
+        const screenY = (y - game.camera.displayY) * TILE_SIZE;
+
+        const colors = {
+            [TILES.VOID]: '#0a0014',
+            [TILES.GROUND]: '#3a2f2f',
+            [TILES.TREE]: '#1a1a1a',
+            [TILES.ROOT]: '#d946ef',
+            [TILES.AMETHYST]: '#3a2f2f',
+            [TILES.MEDIUM_AMETHYST]: '#3a2f2f',
+            [TILES.BIG_AMETHYST]: '#3a2f2f',
+            [TILES.HUGE_AMETHYST]: '#3a2f2f',
+            [TILES.HOUSE]: '#4a3c3c',
+            [TILES.CASTLE_WALL]: '#5a5a5a',
+            [TILES.CASTLE_TOWER]: '#3a3a3a',
+            [TILES.CASTLE_RUINS]: '#3a2f2f',
+            [TILES.SHELTER_ROOF]: '#6a5a4a',
+            [TILES.SHELTER_STICK]: '#8a7a6a',
+            [TILES.SHRINE]: '#ffd700',
+            [TILES.MAGIC_TILE]: '#8b00ff',
+            [TILES.MAZE_WALL]: '#2a2a2a'
+        };
+
+        ctx.fillStyle = colors[tile] || '#000';
+        ctx.fillRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
+
+        if (tile === TILES.TREE) {
+            ctx.fillStyle = '#2d2424';
+            ctx.fillRect(screenX + 4, screenY + 4, TILE_SIZE - 8, TILE_SIZE - 8);
+        } else if (tile === TILES.ROOT) {
+            ctx.fillStyle = '#c026d3';
+            ctx.fillRect(screenX + 8, screenY + 8, TILE_SIZE - 16, TILE_SIZE - 16);
+        } else if (tile === TILES.AMETHYST) {
+            ctx.fillStyle = '#a855f7';
+            ctx.beginPath();
+            ctx.arc(screenX + TILE_SIZE / 2, screenY + TILE_SIZE / 2, 8, 0, Math.PI * 2);
+            ctx.fill();
+        } else if (tile === TILES.MEDIUM_AMETHYST) {
+            ctx.fillStyle = '#a855f7';
+            ctx.beginPath();
+            ctx.arc(screenX + TILE_SIZE / 2, screenY + TILE_SIZE / 2, 10, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#c084fc';
+            ctx.beginPath();
+            ctx.arc(screenX + TILE_SIZE / 2, screenY + TILE_SIZE / 2, 6, 0, Math.PI * 2);
+            ctx.fill();
+        } else if (tile === TILES.BIG_AMETHYST) {
+            ctx.fillStyle = '#a855f7';
+            ctx.beginPath();
+            ctx.arc(screenX + TILE_SIZE / 2, screenY + TILE_SIZE / 2, 12, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#d8b4fe';
+            ctx.beginPath();
+            ctx.arc(screenX + TILE_SIZE / 2, screenY + TILE_SIZE / 2, 8, 0, Math.PI * 2);
+            ctx.fill();
+        } else if (tile === TILES.HUGE_AMETHYST) {
+            ctx.fillStyle = '#a855f7';
+            ctx.beginPath();
+            ctx.arc(screenX + TILE_SIZE / 2, screenY + TILE_SIZE / 2, 14, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#d8b4fe';
+            ctx.beginPath();
+            ctx.arc(screenX + TILE_SIZE / 2, screenY + TILE_SIZE / 2, 10, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#fae8ff';
+            ctx.beginPath();
+            ctx.arc(screenX + TILE_SIZE / 2, screenY + TILE_SIZE / 2, 6, 0, Math.PI * 2);
+            ctx.fill();
+        } else if (tile === TILES.HOUSE) {
+            ctx.fillStyle = '#2a1c1c';
+            ctx.fillRect(screenX + 2, screenY + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+            ctx.fillStyle = '#1a1414';
+            ctx.fillRect(screenX + 10, screenY + 10, 12, 12);
+        } else if (tile === TILES.CASTLE_WALL) {
+            ctx.fillStyle = '#4a4a4a';
+            ctx.fillRect(screenX + 2, screenY + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+            ctx.fillStyle = '#2a2a2a';
+            ctx.fillRect(screenX + 4, screenY + 4, 10, 6);
+            ctx.fillRect(screenX + 18, screenY + 12, 10, 6);
+        } else if (tile === TILES.CASTLE_TOWER) {
+            ctx.fillStyle = '#2a2a2a';
+            ctx.fillRect(screenX + 2, screenY + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(screenX + 4, screenY + 2, 6, 8);
+            ctx.fillRect(screenX + 22, screenY + 2, 6, 8);
+        } else if (tile === TILES.CASTLE_RUINS) {
+            ctx.fillStyle = '#4a4a4a';
+            ctx.fillRect(screenX + 8, screenY + 12, 16, 12);
+            ctx.fillRect(screenX + 4, screenY + 20, 8, 8);
+        } else if (tile === TILES.SHELTER_ROOF) {
+            ctx.fillStyle = '#5a4a3a';
+            ctx.fillRect(screenX + 2, screenY + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+            ctx.fillStyle = '#4a3a2a';
+            ctx.fillRect(screenX + 4, screenY + 8, TILE_SIZE - 8, 8);
+        } else if (tile === TILES.SHELTER_STICK) {
+            ctx.fillStyle = '#8a7a6a';
+            ctx.fillRect(screenX + 8, screenY + 4, 4, TILE_SIZE - 8);
+            ctx.fillRect(screenX + 20, screenY + 4, 4, TILE_SIZE - 8);
+        } else if (tile === TILES.SHRINE) {
+            ctx.fillStyle = '#daa520';
+            ctx.fillRect(screenX + 8, screenY + 4, 16, TILE_SIZE - 4);
+            ctx.fillStyle = '#ffd700';
+            ctx.fillRect(screenX + 10, screenY + 6, 12, TILE_SIZE - 8);
+        } else if (tile === TILES.MAGIC_TILE) {
+            ctx.fillStyle = '#6a0dad';
+            ctx.fillRect(screenX + 2, screenY + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+            ctx.fillStyle = '#9370db';
+            ctx.fillRect(screenX + 8, screenY + 8, TILE_SIZE - 16, TILE_SIZE - 16);
+        } else if (tile === TILES.MAZE_WALL) {
+            ctx.fillStyle = '#1a1a1a';
+            ctx.fillRect(screenX + 2, screenY + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+        }
+    }
+
+    function drawPlayer() {
+        const screenX = (game.player.displayX - game.camera.displayX) * TILE_SIZE;
+        const screenY = (game.player.displayY - game.camera.displayY) * TILE_SIZE;
+
+        ctx.fillStyle = '#00ff88';
+        ctx.fillRect(screenX + 8, screenY + 12, TILE_SIZE - 16, TILE_SIZE - 12);
+
+        ctx.fillStyle = '#00ffaa';
+        ctx.beginPath();
+        ctx.arc(screenX + TILE_SIZE / 2, screenY + 10, 6, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    function drawEnemy(enemy) {
+        const screenX = (enemy.displayX - game.camera.displayX) * TILE_SIZE;
+        const screenY = (enemy.displayY - game.camera.displayY) * TILE_SIZE;
+
+        ctx.fillStyle = '#ff3333';
+        ctx.fillRect(screenX + 8, screenY + 12, TILE_SIZE - 16, TILE_SIZE - 12);
+
+        ctx.fillStyle = '#ff0000';
+        ctx.beginPath();
+        ctx.arc(screenX + TILE_SIZE / 2, screenY + 10, 6, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    function drawKing(king) {
+        const screenX = (king.displayX - game.camera.displayX) * TILE_SIZE;
+        const screenY = (king.displayY - game.camera.displayY) * TILE_SIZE;
+
+        ctx.fillStyle = '#ff6600';
+        ctx.fillRect(screenX + 6, screenY + 14, TILE_SIZE - 12, TILE_SIZE - 10);
+
+        ctx.fillStyle = '#ff8800';
+        ctx.beginPath();
+        ctx.arc(screenX + TILE_SIZE / 2, screenY + 10, 8, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#ffff00';
+        ctx.fillRect(screenX + TILE_SIZE / 2 - 6, screenY + 2, 12, 4);
+        ctx.fillRect(screenX + TILE_SIZE / 2 - 2, screenY - 2, 4, 4);
+
+        ctx.fillStyle = '#ff0000';
+        ctx.fillRect(screenX + 4, screenY + TILE_SIZE - 4, TILE_SIZE - 8, 2);
+        ctx.fillStyle = '#00ff00';
+        ctx.fillRect(screenX + 4, screenY + TILE_SIZE - 4, (TILE_SIZE - 8) * (king.hp / 3), 2);
+    }
+
+    function drawArcher(archer) {
+        const screenX = (archer.displayX - game.camera.displayX) * TILE_SIZE;
+        const screenY = (archer.displayY - game.camera.displayY) * TILE_SIZE;
+
+        ctx.fillStyle = '#8b4513';
+        ctx.fillRect(screenX + 8, screenY + 12, TILE_SIZE - 16, TILE_SIZE - 12);
+
+        ctx.fillStyle = '#a0522d';
+        ctx.beginPath();
+        ctx.arc(screenX + TILE_SIZE / 2, screenY + 10, 6, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    function drawMage(mage) {
+        const screenX = (mage.displayX - game.camera.displayX) * TILE_SIZE;
+        const screenY = (mage.displayY - game.camera.displayY) * TILE_SIZE;
+
+        ctx.fillStyle = '#4b0082';
+        ctx.fillRect(screenX + 8, screenY + 12, TILE_SIZE - 16, TILE_SIZE - 12);
+
+        ctx.fillStyle = '#8b008b';
+        ctx.beginPath();
+        ctx.arc(screenX + TILE_SIZE / 2, screenY + 10, 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#ff0000';
+        ctx.fillRect(screenX + 4, screenY + TILE_SIZE - 4, TILE_SIZE - 8, 2);
+        ctx.fillStyle = '#00ff00';
+        ctx.fillRect(screenX + 4, screenY + TILE_SIZE - 4, (TILE_SIZE - 8) * (mage.hp / 2), 2);
+    }
+
+    function drawArcherChief(chief) {
+        const screenX = (chief.displayX - game.camera.displayX) * TILE_SIZE;
+        const screenY = (chief.displayY - game.camera.displayY) * TILE_SIZE;
+
+        ctx.fillStyle = '#654321';
+        ctx.fillRect(screenX + 6, screenY + 14, TILE_SIZE - 12, TILE_SIZE - 10);
+
+        ctx.fillStyle = '#8b4513';
+        ctx.beginPath();
+        ctx.arc(screenX + TILE_SIZE / 2, screenY + 10, 8, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#daa520';
+        ctx.fillRect(screenX + TILE_SIZE / 2 - 6, screenY + 2, 12, 4);
+
+        ctx.fillStyle = '#ff0000';
+        ctx.fillRect(screenX + 4, screenY + TILE_SIZE - 4, TILE_SIZE - 8, 2);
+        ctx.fillStyle = '#00ff00';
+        ctx.fillRect(screenX + 4, screenY + TILE_SIZE - 4, (TILE_SIZE - 8) * (chief.hp / 3), 2);
+    }
+
+    function drawDroppedItem(item) {
+        const screenX = (item.x - game.camera.displayX) * TILE_SIZE;
+        const screenY = (item.y - game.camera.displayY) * TILE_SIZE;
+
+        if (item.type === TILES.AMETHYST) {
+            ctx.fillStyle = '#a855f7';
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, 6, 0, Math.PI * 2);
+            ctx.fill();
+        } else if (item.type === TILES.MEDIUM_AMETHYST) {
+            ctx.fillStyle = '#a855f7';
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#c084fc';
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, 5, 0, Math.PI * 2);
+            ctx.fill();
+        } else if (item.type === TILES.BIG_AMETHYST) {
+            ctx.fillStyle = '#a855f7';
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, 10, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#d8b4fe';
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, 6, 0, Math.PI * 2);
+            ctx.fill();
+        } else if (item.type === TILES.HUGE_AMETHYST) {
+            ctx.fillStyle = '#a855f7';
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, 12, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#d8b4fe';
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#fae8ff';
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, 4, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    function drawProjectile(proj) {
+        const screenX = (proj.x - game.camera.displayX) * TILE_SIZE;
+        const screenY = (proj.y - game.camera.displayY) * TILE_SIZE;
+
+        ctx.fillStyle = '#ffff00';
+        ctx.beginPath();
+        ctx.arc(screenX, screenY, 4, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    function drawHomingProjectile(proj) {
+        const screenX = (proj.x - game.camera.displayX) * TILE_SIZE;
+        const screenY = (proj.y - game.camera.displayY) * TILE_SIZE;
+
+        ctx.fillStyle = '#ff00ff';
+        ctx.beginPath();
+        ctx.arc(screenX, screenY, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#ffff00';
+        ctx.beginPath();
+        ctx.arc(screenX, screenY, 3, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    function drawPlayerProjectile(proj) {
+        const screenX = (proj.x - game.camera.displayX) * TILE_SIZE;
+        const screenY = (proj.y - game.camera.displayY) * TILE_SIZE;
+
+        if (proj.isHoming) {
+            ctx.fillStyle = '#00ffff';
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, 3, 0, Math.PI * 2);
+            ctx.fill();
+        } else {
+            ctx.fillStyle = '#00ff00';
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, 4, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    function gameLoop() {
+        const currentTime = Date.now();
+        const deltaTime = (currentTime - game.lastFrameTime) / 1000;
+        game.lastFrameTime = currentTime;
+
+        checkKeyInput();
+        updatePlayerMovement(deltaTime);
+
+        game.enemies.forEach(e => e.update(deltaTime));
+        game.enemies = game.enemies.filter(e => e.active);
+
+        game.kings.forEach(k => k.update(deltaTime));
+        game.kings = game.kings.filter(k => k.active);
+
+        game.archers.forEach(a => a.update(deltaTime));
+        game.archers = game.archers.filter(a => a.active);
+
+        game.mages.forEach(m => m.update(deltaTime));
+        game.mages = game.mages.filter(m => m.active);
+
+        game.archerChiefs.forEach(ac => ac.update(deltaTime));
+        game.archerChiefs = game.archerChiefs.filter(ac => ac.active);
+
+        game.projectiles.forEach(p => p.update(deltaTime));
+        game.projectiles = game.projectiles.filter(p => p.active);
+
+        game.playerProjectiles.forEach(p => p.update(deltaTime));
+        game.playerProjectiles = game.playerProjectiles.filter(p => p.active);
+
+        checkNearestInteractable();
+
+        game.camera.x = game.player.x - Math.floor(VIEW_WIDTH / 2);
+        game.camera.y = game.player.y - Math.floor(VIEW_HEIGHT / 2);
+
+        const smoothFactor = 0.15;
+        game.camera.displayX += (game.camera.x - game.camera.displayX) * smoothFactor;
+        game.camera.displayY += (game.camera.y - game.camera.displayY) * smoothFactor;
+
+        ctx.fillStyle = '#0a0014';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const startX = Math.floor(game.camera.displayX) - 1;
+        const startY = Math.floor(game.camera.displayY) - 1;
+
+        for (let y = startY; y < startY + VIEW_HEIGHT + 2; y++) {
+            for (let x = startX; x < startX + VIEW_WIDTH + 2; x++) {
+                drawTile(x, y, getTile(x, y));
+            }
+        }
+
+        game.droppedItems.forEach(item => {
+            if (item.active) drawDroppedItem(item);
+        });
+
+        game.enemies.forEach(enemy => {
+            if (enemy.active) drawEnemy(enemy);
+        });
+
+        game.kings.forEach(king => {
+            if (king.active) drawKing(king);
+        });
+
+        game.archers.forEach(archer => {
+            if (archer.active) drawArcher(archer);
+        });
+
+        game.mages.forEach(mage => {
+            if (mage.active) drawMage(mage);
+        });
+
+        game.archerChiefs.forEach(chief => {
+            if (chief.active) drawArcherChief(chief);
+        });
+
+        game.projectiles.forEach(proj => {
+            if (proj.active) {
+                if (proj instanceof HomingProjectile) {
+                    drawHomingProjectile(proj);
+                } else {
+                    drawProjectile(proj);
+                }
+            }
+        });
+
+        game.playerProjectiles.forEach(proj => {
+            if (proj.active) drawPlayerProjectile(proj);
+        });
+        drawPlayer();
+        requestAnimationFrame(gameLoop);
+    }
+
+    function startGame() {
+        const seedInput = document.getElementById('seedInput').value.trim();
+        let seed = Date.now();
+
+        if (seedInput) {
+            const parsed = parseInt(seedInput);
+            if (!isNaN(parsed) && parsed > 0) {
+                seed = parsed;
+            }
+        }
+        rng = new Random(seed);
+
+        document.getElementById('startScreen').style.display = 'none';
+        document.getElementById('gameCanvas').style.display = 'block';
+        document.getElementById('ui').style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        initGame();
+        gameLoop();
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (!game.keys[e.key]) {
+            game.keys[e.key] = true;
+
+            if (e.key === 'q' || e.key === 'Q' || e.key === 'й' || e.key === 'Й') {
+                playerAttackSimple();
+            } else if (e.key === 'e' || e.key === 'E' || e.key === 'у' || e.key === 'У') {
+                playerAttackHoming();
+            } else if (e.key === 'f' || e.key === 'F' || e.key === 'а' || e.key === 'А') {
+                playerAction();
+            }
+        }
+    });
+
+    document.addEventListener('keyup', (e) => {
+        game.keys[e.key] = false;
+    });
+
+    document.querySelectorAll('.control-btn').forEach(btn => {
+        btn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            game.keys[btn.dataset.key] = true;
+        });
+
+        btn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            game.keys[btn.dataset.key] = false;
+        });
+
+        btn.addEventListener('mousedown', (e) => {
+            game.keys[btn.dataset.key] = true;
+        });
+
+        btn.addEventListener('mouseup', (e) => {
+            game.keys[btn.dataset.key] = false;
+        });
+    });
+
+    document.querySelectorAll('.attack-btn').forEach(btn => {
+        const handler = (e) => {
+            e.preventDefault();
+            const attack = btn.dataset.attack;
+            if (attack === 'q') {
+                playerAttackSimple();
+            } else if (attack === 'e') {
+                playerAttackHoming();
+            } else if (attack === 'f') {
+                playerAction();
+            }
+        };
+
+        btn.addEventListener('click', handler);
+        btn.addEventListener('touchstart', handler);
+    });
+</script>
+</body>
+</html>

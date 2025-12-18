@@ -1,0 +1,97 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #1f1f1f;
+  color: #f0f0f0;
+  margin: 0;
+  padding: 0;
+}
+
+.game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+h1 {
+  font-size: 36px;
+  margin-bottom: 20px;
+}
+
+.game-info {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.info-item {
+  margin: 0 3px;
+}
+
+#room-description {
+  font-size: 18px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.game-buttons button {
+  font-size: 18px;
+  padding: 10px 20px;
+  margin: 0 10px 10px;
+  background-color: #2c2c2c;
+  color: #f0f0f0;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.game-buttons button:hover {
+  background-color: #3c3c3c;
+}
+#output {
+  font-size: 14px;
+  color: #FFD700;
+}
+.link{
+	color: yellow;
+}
+.link:hover{
+	color: red;
+}
+.context-menu {
+  display: none;
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.8);
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 0 20px rgba(75, 0, 130, 0.5);
+  padding: 8px 0;
+  z-index: 2;
+  width: 500px;
+  font-size: 14px;
+}
+
+.context-menu ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.context-menu li {
+  padding: 8px 16px;
+}
+
+.context-menu .context-menu-title {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.context-menu li ul {
+  padding-left: 20px;
+}
+
+.context-menu li ul li {
+  padding: 4px 0;
+}

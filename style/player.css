@@ -1,0 +1,143 @@
+.player-controls{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.player-controls label{
+    margin-bottom: 5px;
+    text-align: center;
+    color: #9966cc;
+}
+.slider-container{
+    width: 60%;
+    position: relative;
+    background-color: rgba(255,255,255,0.1);
+    border-radius: 5px;
+}
+.slider-fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background: linear-gradient(to right, #8A2BE2, #C71585); /* Градиент для полосы */
+    border-radius: 5px;
+    pointer-events: none;
+}
+#slideSong{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#seekSlider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 10px;
+    background: transparent; 
+    outline: none;
+    position: relative;
+    cursor: pointer;
+}
+#seekSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    background-color: #2c3864;
+    border-radius: 50%;
+    cursor: pointer;
+}
+#volumeSlider{
+   -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 10px;
+    background: transparent; 
+    outline: none;
+    position: relative;
+    cursor: pointer;
+}
+#volumeSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    background-color: #2c3864;
+    border-radius: 50%;
+    cursor: pointer;
+}
+.time-display{
+    margin-bottom: 10px;
+    color: #9966cc;
+}
+.play-button {
+    display: block;
+    margin: 10px auto;
+    padding: 10px 20px;
+    background-color: #663399;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+}
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(20, 0, 40, 0.8); /* Более фиолетовый фон */
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: rgba(30, 10, 60, 0.9); /* Более фиолетовый фон контента */
+    border: 1px solid #4a2a6a; /* Фиолетовая граница */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    color: #eee; /* Светлый текст */
+    padding: 20px;
+    max-width: 80%;
+    max-height: 80%;
+    width: auto;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: auto;
+    border-radius: 50px;
+}
+
+.modal-content h2 {
+    margin-bottom: 20px;
+    color: #d450f9; /* Фиолетовый заголовок */
+}
+
+.modal-content button {
+    margin: 5px;
+    cursor: pointer;
+}
+
+.close {
+    color: #ccc; /* Светло-серый крестик */
+    font-size: 28px;
+    font-weight: bold;
+    transition: color 0.3s ease;
+    align-self: flex-end;
+    margin-bottom: 10px;
+}
+
+.close:hover,
+.close:focus {
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+}

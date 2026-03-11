@@ -1,0 +1,164 @@
+# Changelog
+
+Все заметные изменения в проекте **Song of the Abyss** будут задокументированы в этом файле.
+
+Формат ведётся в соответствии с [Keep a Changelog](https://keepachangelog.com/ru/1.0.0/),
+а проект следует [Semantic Versioning](https://semver.org/lang/ru/).
+
+---
+
+## [Не выпущено]
+
+### Добавлено
+- Полная релизная версия сайте, с удержением пользователя в сессии на основе токенов.
+- Оптимизация, и чистка мусора.
+
+### Удалено
+- Устаревшие файлы.
+
+---
+
+## [1.0.0] — 2026-03-12
+
+### Добавлено
+
+#### 🌐 Abyss Net (Социальная сеть)
+- Основная лента постов (`abyss_net/main.php`)
+- Просмотр и создание постов (`abyss_net/post.php`, `abyss_net/redact.php`)
+- Система комментариев (`abyss_net/comment_core.php`)
+- Оценка постов (`abyss_net/rate_post.php`)
+- Музыкальный сервис AbyssNet Song (`abyss_net/audio_libraly.php`)
+- Внутренний поисковик Abyss Search (`abyss_net/search.php`)
+- Загрузка медиафайлов (`abyss_net/upload_core.php`)
+- Система очередей и плейлистов
+- Полноэкранный режим плеера
+- Библиотека для drag-and-drop (`abyss_net/js/dragula.min.js`)
+
+#### 👤 Profile (Личный кабинет)
+- Регистрация и авторизация (`profile/registration.php`, `profile/login.php`)
+- Профиль пользователя (`profile/profile.php`, `profile/main.php`)
+- Внутренняя почта с шифрованием (`profile/mail/`)
+  - Отправка/получение писем
+  - Админ-панель для модерации
+  - Зашифрованные вложения
+  - Генерация ключей шифрования
+- Магазин косметических элементов (`profile/shop.php`)
+- Система кейсов (`profile/case_core.php`)
+- Валюта «Эфир» (`profile/ether_core.php`)
+- Настройки профиля (`profile/setting.php`)
+- Поиск пользователей (`profile/search_profile.php`)
+- Лог действий (`profile/log.php`)
+- Система стикеров
+
+#### 🤖 AI-инструменты
+- Лёгкий AI-чат (`profile/ai/lite_ai.php`)
+- Генерация артов (`profile/ai/art_chat.php`)
+- RP-чат (`profile/ai/rp_chat.php`)
+- Расширенные AI-инструменты (`profile/ai/ai_tools_beta.php`)
+  - Поиск информации
+  - Чтение URL
+  - Получение данных пользователя
+  - Premium-функции
+
+#### ✍️ Legend (Рассказы)
+- Публикация рассказов (`story/main.php`, `story/story.php`)
+- Редактор рассказов (`story/redact.php`)
+- Загрузка обложек (`story/upload_core.php`)
+- Возрастные ограничения (0+, 6+, 12+, 16+, 18+)
+
+#### 🎮 Игры (Travels)
+- Тетрис (`tetris.php`, `tetris_casino.php`, `tetris_casino_x.php`, `casino_lite.php`)
+- Змейка (`snake.php`)
+- Flappy Bird (`flappy_bird.html`)
+- Подземелье (`dungeon/dungeon.php`)
+- Доска для рисования (`drawes/draw.php`)
+- SotA Game (`abyss_game3.html`)
+- Квесты (`quest/index.php`)
+
+#### 📚 Контент
+- Страница об авторе (`about_me.html`)
+- Легенды проекта (`legend.php`)
+- Раздел Arknights (`arknights/arknights.php`)
+- Литературный раздел (`literate/`)
+  - Хеллоуинская тема
+  - Градиенты
+- Секретные страницы (`secret.html`, `quantum_box.php`, `rikroll.php`)
+
+#### 🔧 Система
+- Ядро системы (`core.php`)
+- Система аутентификации (`template/auth.php`)
+  - Шифрование токенов AES-256-GCM
+  - Email-верификация
+  - Защита сессий
+- Подключение к БД (`template/conn.php`, `template/conn_sys.php`)
+- Система достижений (`achievement_core.php`)
+- Система предметов (`items_core.php`)
+- API инвентаря (`template/invent_api.php`)
+- Получение данных пользователя (`template/get_user_data.php`)
+- Управление сессиями (`template/session_data.php`)
+
+#### 🎨 Дизайн
+- Основные стили (`style/style.css`)
+- Стили для профиля, игр, сервисов
+- SVG-иконки для сезонных событий
+  - Снежинки (Новый год)
+  - Тыквы, летучие мыши, призраки (Хеллоуин)
+- Адаптивный дизайн на Bootstrap 4.3.1
+
+#### 📦 Библиотеки
+- PHPMailer — почтовая библиотека
+- Parsedown — Markdown-парсер
+- jQuery 3.7.1
+- Font Awesome 6.4.0
+
+#### 🔐 Безопасность
+- Шифрование почты (RSA ключи в `keys/`)
+- Зашифрованные вложения (`encrypted_attachments/`)
+- Система групп пользователей (USER, BANNED, ADMIN)
+- Защита от XSS и SQL-инъекций
+- HTTPS и secure cookie
+
+### Изменено
+- Обновлена документация проекта (README.md)
+- Улучшена структура файлов проекта
+- Оптимизированы JavaScript-скрипты игр
+
+### Исправлено
+- Ошибки в системе авторизации
+- Проблемы с загрузкой медиафайлов
+- Ошибки отображения в мобильной версии
+
+---
+
+## [0.0.1] — 2025-12-18 (Initial Commit)
+
+### Добавлено
+- Начальная структура проекта
+- Лицензия AGPL-3.0
+- Git-атрибуты (`.gitattributes`)
+
+---
+
+## Сокращения
+
+- **SotA** — Song of the Abyss
+- **Abyss Net** — социальная сеть проекта
+- **Legend** — раздел рассказов
+- **Travels** — игровой раздел
+- **AI** — искусственный интеллект
+- **RP** — Role Play (ролевая игра)
+- **SMTP** — Simple Mail Transfer Protocol
+- **XSS** — Cross-Site Scripting
+- **SQL** — Structured Query Language
+- **AES-256-GCM** — Advanced Encryption Standard (256-bit, Galois/Counter Mode)
+- **RSA** — Rivest–Shamir–Adleman (алгоритм шифрования)
+
+---
+
+<div align="center">
+
+**Song of the Abyss** © 2023-2026 DarkusFoxis
+
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+
+</div>

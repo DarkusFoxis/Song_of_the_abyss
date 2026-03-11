@@ -1,0 +1,64 @@
+html, body{
+    height: 100%;
+    margin: 0;
+}
+body{
+    background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+canvas{
+    border: 1px solid white;
+}
+.score {
+  position: absolute;
+  top: 10px;
+  left: -5px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-family: Arial, sans-serif;
+}
+.link{
+	color: yellow;
+}
+.link:hover{
+	color: red;
+}
+.context-menu {
+  display: none;
+  position: absolute;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 8px 0;
+  z-index: 2;
+  width: 300px;
+  font-size: 14px;
+}
+
+.context-menu ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.context-menu li {
+  padding: 8px 16px;
+}
+
+.context-menu .context-menu-title {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.context-menu li ul {
+  padding-left: 20px;
+}
+
+.context-menu li ul li {
+  padding: 4px 0;
+}

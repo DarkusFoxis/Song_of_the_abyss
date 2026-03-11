@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ru" prefix="og:http://ogp.me/ns#">
+<head>
+<meta charset="UTF-8"/>
+<link rel="icon" href="./img/icon.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>О DarkusFoxis</title>
+<meta name="description" content="Познакомьтесь с DarkusFoxis, создателем Song of the Abyss."/>
+<meta property="og:title" content="О DarkusFoxis"/>
+<meta property="og:site_name" content="Song of the abyss"/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://so-ta.ru/about_mi"/>
+<meta property="og:description" content="Познакомьтесь с DarkusFoxis, создателем Song of the Abyss."/>
+<meta property="og:image" content="https://so-ta.ru/profile/stikers/darkusfoxis_epic.webp"/>
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Montserrat Alternates', sans-serif;
+    background: #0a0a0a;
+    color: white;
+    overflow: hidden;
+}
+
+#loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #1e1e2e 0%, #0a0a0a 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    transition: opacity 0.5s ease;
+}
+
+#loading-screen.hide {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.loader {
+    width: 120px;
+    height: 120px;
+    border: 8px solid rgba(255, 255, 255, 0.1);
+    border-top: 8px solid #6366f1;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 30px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #e0e0e0;
+}
+
+.progress-bar-container {
+    width: 300px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 15px;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    width: 0%;
+    transition: width 0.3s ease;
+    border-radius: 10px;
+}
+
+.progress-percentage {
+    font-size: 18px;
+    color: #a0a0a0;
+    margin-bottom: 30px;
+}
+
+#open-button {
+    display: none;
+    padding: 15px 40px;
+    font-size: 18px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    border: none;
+    border-radius: 30px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    font-family: 'Montserrat Alternates', sans-serif;
+}
+
+#open-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+}
+
+#open-button.show {
+    display: block;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#video-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.8s ease;
+    background: #000;
+}
+
+#video-container.show {
+    opacity: 1;
+    pointer-events: all;
+}
+
+#main-video {
+    max-width: 90%;
+    max-height: 90%;
+    box-shadow: 0 0 50px rgba(99, 102, 241, 0.3);
+    border-radius: 10px;
+}
+</style>
+</head>
+<body>
+<div id="loading-screen">
+    <div class="loader"></div>
+    <div class="loading-text">Загрузка...</div>
+    <div class="progress-bar-container">
+        <div class="progress-bar" id="progress-bar"></div>
+    </div>
+    <div class="progress-percentage" id="progress-percentage">0%</div>
+    <button id="open-button">Открыть страницу</button>
+</div>
+
+<div id="video-container">
+    <video id="main-video" controls>
+        <source src="./video_blog/media/test.mp4" type="video/mp4">
+        Ваш браузер не поддерживает видео.
+    </video>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const video = document.getElementById('main-video');
+    const progressBar = document.getElementById('progress-bar');
+    const progressPercentage = document.getElementById('progress-percentage');
+    const openButton = document.getElementById('open-button');
+    const loadingScreen = document.getElementById('loading-screen');
+    const videoContainer = document.getElementById('video-container');
+
+    let videoLoaded = false;
+
+    video.addEventListener('progress', function() {
+        if (video.buffered.length > 0) {
+            const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+            const duration = video.duration;
+            if (duration > 0) {
+                const percent = (bufferedEnd / duration) * 100;
+                updateProgress(percent);
+            }
+        }
+    });
+
+    video.addEventListener('canplaythrough', function() {
+        if (!videoLoaded) {
+            videoLoaded = true;
+            updateProgress(100);
+            showOpenButton();
+        }
+    });
+
+    video.addEventListener('loadeddata', function() {
+        if (!videoLoaded && video.readyState >= 3) {
+            videoLoaded = true;
+            updateProgress(100);
+            showOpenButton();
+        }
+    });
+
+    video.addEventListener('error', function(e) {
+        console.error('Ошибка загрузки видео:', e);
+        updateProgress(100);
+        openButton.classList.add('show');
+    });
+
+    function updateProgress(percent) {
+        const rounded = Math.min(Math.round(percent), 100);
+        progressBar.style.width = rounded + '%';
+        progressPercentage.textContent = rounded + '%';
+    }
+
+    function showOpenButton() {
+        video.play().then(function() {
+            console.log('Автовоспроизведение успешно');
+            setTimeout(function() {
+                loadingScreen.classList.add('hide');
+                videoContainer.classList.add('show');
+            }, 500);
+        }).catch(function(error) {
+            console.log('Автовоспроизведение заблокировано:', error);
+            video.pause();
+            openButton.classList.add('show');
+        });
+    }
+
+    openButton.addEventListener('click', function() {
+        loadingScreen.classList.add('hide');
+
+        setTimeout(function() {
+            videoContainer.classList.add('show');
+            video.play().catch(function(error) {
+                console.log('Ошибка воспроизведения:', error);
+            });
+        }, 500);
+    });
+
+    video.load();
+});
+</script>
+</body>
+</html>

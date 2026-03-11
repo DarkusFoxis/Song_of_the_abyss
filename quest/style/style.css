@@ -1,0 +1,91 @@
+html {
+  height: 100%;
+}
+body{
+	margin: 0;
+	background-image: url(../img/normal_fone.jpg);
+	background-attachment: fixed;
+	min-height: 100%;
+	display: grid;
+  	grid-template-rows: auto 1fr auto;
+}
+hr{
+	clear:both;
+	display:block;
+	background-color: #FFA500;
+}
+.navbar {
+	overflow: hidden;
+	background-color: #4169E1;
+}
+.blok{
+	float: left;
+	overflow: hidden;
+}
+.blok .blc {
+	font-size: 16px;  
+	border: none;
+	outline: none;
+	color: white;
+	padding: 10px 20px;
+	background-color: inherit;
+	font-family: inherit;
+	margin: 0;
+}
+.navbar a {
+	float: left;
+	font-size: 16px;
+	color: white;
+	text-align: center;
+	padding: 1px 10px;
+	text-decoration: none;
+}
+.navbar a:hover, .block:hover .blc {
+	background-color: #00BFFF;
+	color: black;
+	text-decoration: none;
+}
+.navbar a.right {
+	float: right;
+}
+.menu {
+	display: none;
+	position: absolute;
+	background-color:  #9400D3;
+	min-width: 30px;
+	box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+	z-index: 1;
+}
+.menu a{
+	float: none;
+	display: block;
+	color: white;
+	text-align: left;
+	padding: 10px 20px;
+	text-decoration: none;
+}
+.menu a:hover{
+	background-color: #9932CC;
+	color: black;
+}
+.blok:hover .menu{
+	display: block;
+}
+.header{
+	margin: 20px;
+}
+.content-main{
+	background-color: rgba(0,0,0,0.55);
+	color: #FFE4E1;
+	font-family: 'Montserrat Alternates', sans-serif;
+}
+.footer{
+	color: #FFE4E1;
+	background-color: #808080;
+}
+.link{
+	color: yellow;
+}
+.link:hover{
+	color: red;
+}

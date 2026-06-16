@@ -28,7 +28,7 @@
 <head>
 <title>Бездна лидеров</title>
 <link rel="icon" href="../img/icon.png">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="../style/bootstrap.min.css">
 <link rel="stylesheet" href="../style/style.css">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@200;300;500&display=swap" rel="stylesheet">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">

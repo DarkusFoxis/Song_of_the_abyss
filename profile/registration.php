@@ -36,8 +36,6 @@ if ($redirectTarget !== '') {
     <link rel="icon" href="../img/icon.png">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@200;300&amp;display=swap" rel="stylesheet">
     <title>Регистрация</title>
     <style>
@@ -101,6 +99,9 @@ if ($redirectTarget !== '') {
 
         <label for="pass2">Повторите пароль</label><br>
         <input id="pass2" type="password" name="password2" required maxlength="15" placeholder="Повторите пароль" minlength="8" class="input-text"><br>
+        
+        <label for="phone">Номер телефона</label><br>
+        <input id="text" type="text" name="phone" maxlength="150" placeholder="Введите номер телефона" class="input-text"><br>
 
         <input type="checkbox" id="see_password"> Показать пароль<br>
         <center><input type="submit" class="submit-button" value="Зарегистрироваться"><br>

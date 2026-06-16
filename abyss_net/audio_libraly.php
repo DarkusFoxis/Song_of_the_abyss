@@ -18,15 +18,11 @@ function generateTrackCard($row) {
     $audioId = htmlspecialchars($row['audio_id']);
     $audioPath = htmlspecialchars($row['path']);
     $coverPath = htmlspecialchars($row['cover_patch']);
-
-    $dataAttrs = sprintf(
-        'data-src="./media/audio/%s" data-title="%s" data-artist="%s" data-uploader="%s" data-cover="./icon/%s"',
-        $audioPath, $trackName, $authorName, $username, $coverPath
-    );
-
+    
+    $dataAttrs = sprintf('data-src="./media/audio/%s" data-title="%s" data-artist="%s" data-uploader="%s" data-cover="./icon/%s"',$audioPath, $trackName, $authorName, $username, $coverPath);
     return <<<HTML
     <div class="col-12 col-md-6 mb-4 track_class_data">
-        <div class="track-card">
+        <div class="track-card" data-search-title="{$trackName}" data-search-artist="{$authorName}" data-search-uploader="{$username}">
             <img src="../profile/avatars/{$avatar}" alt="Аватар {$username}" class="track-card_avatar">
             <div class="track-card_info">
                 <div class="track-title">{$trackName}</div>
@@ -105,23 +101,20 @@ if (!empty($_GET['track_id'])) {
 <head>
     <title>Музыкальная библиотека</title>
     <link rel="icon" href="../img/icon.png">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<link rel="stylesheet" href="../style/bootstrap.min.css">
     <link rel="stylesheet" href="../style/style.css">
-    <link rel="stylesheet" href="./style/audioLibraly1.2.5.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="./style/audioLibraly1.4.1.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@200;300&display=swap" rel="stylesheet">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="../js/jquery-3.7.1.min.js"></script>
     <script src="./js/dragula.min.js"></script>
-    <script src="./js/audioPlayer1.4.1.js"></script>
-    <script src="./js/search.js"></script>
+    <script src="./js/audioPlayer1.5.js"></script>
+    <script src="./js/search1.js"></script>
     <script src="./js/update1_2.js"></script>
     <style>
         .track-card { height: 100%; transition: transform 0.2s, box-shadow 0.2s; }
         .track-card:hover {transform: translateY(-3px); box-shadow: 0 8px 25px rgba(153, 102, 204, 0.3);}
-        @media (max-width: 767px) {.col-md-6 { flex: 0 0 100%; max-width: 100%; }}
         .sort-controls {display: flex; align-items: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;}
         .sort-controls label {color: #aaa; font-size: 14px; font-weight: 500;}
         .sort-controls select {background: rgba(30, 30, 50, 0.9); border: 1px solid rgba(100, 150, 255, 0.3); color: #fff; padding: 8px 15px; border-radius: 6px; font-size: 14px; cursor: pointer; outline: none; transition: all 0.3s;}
@@ -131,7 +124,7 @@ if (!empty($_GET['track_id'])) {
         .header {margin-bottom: 20px; padding: 20px; background: rgba(30, 30, 50, 0.5); border-radius: 15px; border: 1px solid rgba(153, 102, 204, 0.2);}
         .header-controls {display: flex; align-items: center; gap: 15px; flex-wrap: wrap;}
         #title_site {background: linear-gradient(135deg, #9966cc, #ba147e); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 700;}
-        #trackSearch {flex: 1; min-width: 200px; background: rgba(30, 30, 50, 0.9); border: 1px solid rgba(153, 102, 204, 0.3); color: #fff; padding: 10px 15px; border-radius: 8px; font-size: 14px; outline: none; transition: all 0.3s;}
+        #trackSearch {flex: 1; min-width: 100px; background: rgba(30, 30, 50, 0.9); border: 1px solid rgba(153, 102, 204, 0.3); color: #fff; padding: 10px 15px; border-radius: 8px; font-size: 14px; outline: none; transition: all 0.3s;}
         #trackSearch:focus {border-color: rgba(153, 102, 204, 0.6); box-shadow: 0 0 15px rgba(153, 102, 204, 0.3);}
         #trackSearch::placeholder {color: #666;}
         #tracks-container {transition: opacity 0.3s;}
@@ -164,7 +157,7 @@ if (!empty($_GET['track_id'])) {
                     <div class="header">
                         <div class="header-controls">
                             <h2 id="title_site" style="margin: 0;">Музыкальная библиотека</h2>
-                            <span class="sort-badge" id="sortBadge">Новые сначала</span>
+                            <span class="sort-badge" id="sortBadge">Сначала новые</span>
                         </div>
                         
                         <div class="sort-controls" style="margin-top: 20px;">
@@ -294,7 +287,7 @@ if (!empty($_GET['track_id'])) {
 
             const badgeTexts = {
                 'new_to_old': 'Сначала новые',
-                'old_to_new': 'Старые сначала',
+                'old_to_new': 'Сначала старые',
                 'random': 'Случайный порядок'
             };
             sortBadge.textContent = badgeTexts[sortOrder] || 'Сначала новые';

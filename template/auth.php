@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/security.php';
+
 if (!defined('AUTH_TOKEN_COOKIE')) {
     define('AUTH_TOKEN_COOKIE', 'bear_token');
 }
@@ -139,17 +141,12 @@ function auth_decrypt_token(string $encrypted): ?string
 
 function auth_start_session(): void
 {
-    if (session_status() !== PHP_SESSION_ACTIVE) {
-        session_start();
-    }
+    security_bootstrap_session();
 }
 
 function auth_is_https(): bool
 {
-    if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
-        return true;
-    }
-    return isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443;
+    return security_is_https();
 }
 
 //  COOKIE (хранит ЗАШИФРОВАННЫЙ токен)

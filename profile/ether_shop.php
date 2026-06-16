@@ -45,7 +45,7 @@ $price_petal_sell = floor($ether_data['petal'] * 10000000);
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Рынок Эфира бездны</title>
 <link rel="icon" href="../img/icon.png">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="../style/bootstrap.min.css">
 <link rel="stylesheet" href="../style/style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
@@ -606,6 +606,3 @@ $price_petal_sell = floor($ether_data['petal'] * 10000000);
 </script>
 </body>
 </html>
-
-
-

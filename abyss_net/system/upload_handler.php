@@ -1,235 +1,185 @@
 <?php
 date_default_timezone_set('Europe/Moscow');
-session_start();
-require_once __DIR__ . '/../../template/auth.php';
-auth_sync_session_from_token();
-error_reporting(E_ALL);
-ini_set('display_errors', 0);
-ini_set('log_errors', 1);
-if (file_exists(__DIR__ . '/../../template/conn.php')) {
-    require_once __DIR__ . '/../../template/conn.php';
-} else {
-    $_SESSION['error'] = 'Критическая ошибка: Файл конфигурации БД не найден.';
-    header('Location: core.php');
-    exit;
-}
 
+require_once __DIR__ . '/../../template/auth.php';
+require_once __DIR__ . '/../../template/conn.php';
 require_once __DIR__ . '/audio_compressor.php';
 
-function get_db_connection_handler() {
-    global $host, $log, $password_sql, $database;
-    if (!isset($host)) {
-        return null;
-    }
-    $conn = mysqli_connect($host, $log, $password_sql, $database);
-    if (!$conn || $conn->connect_error) {
-        return null;
-    }
-    mysqli_set_charset($conn, 'utf8mb4');
-    return $conn;
-}
-function redirect_with_error($message) {
+auth_start_session();
+auth_sync_session_from_token();
+
+function redirect_with_error(string $message): void
+{
     $_SESSION['error'] = $message;
     header('Location: core.php');
     exit;
 }
-function redirect_with_success($message) {
+
+function redirect_with_success(string $message): void
+{
     $_SESSION['success'] = $message;
     header('Location: core.php');
     exit;
 }
-//Проверка запроса и авторизации.
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     redirect_with_error('Некорректный метод запроса.');
 }
-if (!isset($_SESSION['user'])) {
-    redirect_with_error('Доступ запрещен. Пожалуйста, авторизуйтесь.');
+
+$currentUser = auth_get_current_user();
+if ($currentUser === null) {
+    redirect_with_error('Доступ запрещён. Пожалуйста, авторизуйтесь.');
 }
-$conn = get_db_connection_handler();
+
+security_require_csrf(true);
+
+$conn = mysqli_connect($host, $log, $password_sql, $database);
 if (!$conn) {
     redirect_with_error('Ошибка подключения к базе данных при обработке загрузки.');
 }
-//Получение актуальных данных пользователя и проверка прав.
-$user_login_session = $_SESSION['user'];
-$escaped_login = mysqli_real_escape_string($conn, $user_login_session);
-$user_query_sql = "SELECT u.id, u.permissions, sg.lvl, COALESCE(max_audio.latest_upload_time, 0) AS last_upload_ts FROM users u JOIN site_group sg ON u.permissions = sg.name LEFT JOIN (SELECT user_id, MAX(data_upload) AS latest_upload_time FROM audio GROUP BY user_id) max_audio ON u.id = max_audio.user_id WHERE u.login = '{$escaped_login}'";
-$user_result = mysqli_query($conn, $user_query_sql);
-if (!$user_result || mysqli_num_rows($user_result) === 0) {
+mysqli_set_charset($conn, 'utf8mb4');
+
+$userStmt = $conn->prepare(
+    "SELECT u.id, sg.lvl, COALESCE(max_audio.latest_upload_time, 0) AS last_upload_ts
+     FROM users u
+     JOIN site_group sg ON u.permissions = sg.name
+     LEFT JOIN (
+         SELECT user_id, MAX(data_upload) AS latest_upload_time
+         FROM audio
+         GROUP BY user_id
+     ) max_audio ON u.id = max_audio.user_id
+     WHERE u.login = ?
+     LIMIT 1"
+);
+$userStmt->bind_param('s', $currentUser['login']);
+$userStmt->execute();
+$userData = $userStmt->get_result()->fetch_assoc();
+$userStmt->close();
+
+if (!$userData) {
     mysqli_close($conn);
-    session_unset(); session_destroy();
+    auth_logout_user();
     redirect_with_error('Ошибка получения данных пользователя. Авторизуйтесь снова.');
 }
-$user_data = mysqli_fetch_assoc($user_result);
-$current_user_id = (int)$user_data['id'];
-$current_user_lvl = (int)$user_data['lvl'];
-$current_last_upload_ts = (int)$user_data['last_upload_ts'];
-if ($current_user_lvl === 0 || $current_user_lvl === 1) {
+
+$currentUserId = (int)$userData['id'];
+$currentUserLevel = (int)$userData['lvl'];
+$currentLastUploadTs = (int)$userData['last_upload_ts'];
+
+if ($currentUserLevel <= 1) {
     mysqli_close($conn);
-    redirect_with_error('Извините, у вас не достаточно прав для загрузки треков.');
+    redirect_with_error('У вас недостаточно прав для загрузки треков.');
 }
-if ($current_user_lvl != 6) {
-    $current_time = time();
-    $cooldown_period = 5 * 60;
-    if (($current_time - $current_last_upload_ts) < $cooldown_period) {
-        mysqli_close($conn);
-        redirect_with_error('Кулдаун на загрузку еще не прошел. Пожалуйста, подождите.');
-    }
+
+if ($currentUserLevel !== 6 && (time() - $currentLastUploadTs) < 5 * 60) {
+    mysqli_close($conn);
+    redirect_with_error('Кулдаун на загрузку ещё не прошёл. Пожалуйста, подождите.');
 }
-//Обработка данных формы.
-$audio_name = trim($_POST['audio_name'] ?? '');
-$author_name = trim($_POST['author_name'] ?? '');
-$self_author_flag = isset($_POST['self_author']) && $_POST['self_author'] == '1';
-if (empty($audio_name) || empty($author_name)) {
+
+$audioName = trim((string)($_POST['audio_name'] ?? ''));
+$authorName = trim((string)($_POST['author_name'] ?? ''));
+$selfAuthorFlag = isset($_POST['self_author']) && $_POST['self_author'] == '1';
+
+if ($audioName === '' || $authorName === '') {
     mysqli_close($conn);
     redirect_with_error('Название трека и имя исполнителя не могут быть пустыми.');
 }
-$db_self_author = 0;
-if ($self_author_flag) {
-    if ($current_user_lvl < 3) {
+
+$dbSelfAuthor = 0;
+if ($selfAuthorFlag) {
+    if ($currentUserLevel < 3) {
         mysqli_close($conn);
-        redirect_with_error('Внимание: Вы не являетесь верифицированным исполнителем! Треки под вашим авторством выходить не могут! Для уточнения, обратитесь к администратору: https://t.me/DarkusFoxis.');
+        redirect_with_error('У вас нет прав публиковать треки под собственным авторством.');
     }
-    $db_self_author = 1;
-}
-//Обработка аудиофайла.
-if (!isset($_FILES['audio_file']) || $_FILES['audio_file']['error'] !== UPLOAD_ERR_OK) {
-    mysqli_close($conn);
-    redirect_with_error('Ошибка загрузки аудиофайла: ' . ($_FILES['audio_file']['error'] ?? 'неизвестная ошибка'));
-}
-$audio_file = $_FILES['audio_file'];
-$audio_allowed_types = ['audio/mpeg', 'audio/wav', 'audio/ogg', 'audio/x-wav', 'audio/webm'];
-$audio_max_size = 20 * 1024 * 1024;
-if (!in_array($audio_file['type'], $audio_allowed_types) && !preg_match('/^audio\//', $audio_file['type'])) {
-    mysqli_close($conn);
-    redirect_with_error('Недопустимый тип аудиофайла. Разрешены: MP3, WAV, OGG, WebM.');
-}
-if ($audio_file['size'] > $audio_max_size) {
-    mysqli_close($conn);
-    redirect_with_error('Размер аудиофайла превышает допустимый лимит (20 MB).');
-}
-$audio_upload_dir = __DIR__ . '/../media/audio/';
-$audio_file_extension = pathinfo($audio_file['name'], PATHINFO_EXTENSION);
-
-// Нормализуем расширение для webm/ogg.
-if (in_array(strtolower($audio_file_extension), ['webm', 'ogg', 'opus'])) {
-    $audio_file_extension = strtolower($audio_file_extension);
-} else {
-    $audio_file_extension = strtolower($audio_file_extension);
+    $dbSelfAuthor = 1;
 }
 
-$audio_unique_name = uniqid('audio_', true) . '.' . $audio_file_extension;
-$audio_destination_path = $audio_upload_dir . $audio_unique_name;
-
-if (!is_dir($audio_upload_dir) || !is_writable($audio_upload_dir)) {
+if (!isset($_FILES['audio_file'])) {
     mysqli_close($conn);
-    error_log("Upload handler: Директория для аудио отсутствует или не доступна для записи: " . $audio_upload_dir);
-    redirect_with_error('Серверная ошибка при подготовке к загрузке аудио. Обратитесь к администратору.');
-}
-if (!move_uploaded_file($audio_file['tmp_name'], $audio_destination_path)) {
-    mysqli_close($conn);
-    redirect_with_error('Не удалось сохранить загруженный аудиофайл.');
+    redirect_with_error('Аудиофайл не передан.');
 }
 
-//Сжатие аудиофайла через FFMpeg (при доступности).
+$audioAllowed = [
+    'audio/mpeg' => 'mp3',
+    'audio/wav' => 'wav',
+    'audio/x-wav' => 'wav',
+    'audio/ogg' => 'ogg',
+    'audio/webm' => 'webm',
+];
+
+$audioUploadDir = __DIR__ . '/../media/audio';
+try {
+    $audioStored = security_store_uploaded_file($_FILES['audio_file'], $audioUploadDir, $audioAllowed, 'audio_', 20 * 1024 * 1024);
+} catch (RuntimeException $e) {
+    mysqli_close($conn);
+    redirect_with_error('Ошибка загрузки аудиофайла: ' . $e->getMessage());
+}
+
 $compressor = new AudioCompressor();
-$compressionEnabled = true;
+if ($compressor->isFFmpegAvailable()) {
+    $compressor->optimizeInPlace($audioStored['path'], ['quality' => 'medium']);
+}
 
-if ($compressionEnabled) {
-    $extension = strtolower($audio_file_extension);
+$dbAudioPath = $audioStored['filename'];
+$dbCoverPath = 'base_cover.png';
 
-    //Проверяем доступность FFMpeg.
-    $ffmpegAvailable = $compressor->isFFmpegAvailable();
+if ($currentUserLevel >= 3 && isset($_FILES['cover_file']) && ($_FILES['cover_file']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
+    $coverAllowed = [
+        'image/jpeg' => 'jpg',
+        'image/png' => 'png',
+    ];
+    $coverUploadDir = __DIR__ . '/../icon';
 
-    if ($ffmpegAvailable) {
-        //Используем FFMpeg для сжатия.
-        error_log("Upload handler: Используем FFMpeg для сжатия аудио");
-        $compressionResult = $compressor->optimizeInPlace($audio_destination_path, [
-            'quality' => 'medium' //128 kbps.
-        ]);
-        error_log("Audio compression (FFMpeg): " . $compressionResult['message']);
-    } else {
-        //Фолбэк на PHP-методы (удаление метаданных).
-        error_log("Upload handler: FFMpeg недоступен, используем PHP-методы");
-
-        if ($extension === 'mp3') {
-            $compressionResult = $compressor->optimizeInPlace($audio_destination_path, [
-                'quality' => 'medium'
-            ]);
-            error_log("Audio optimization (PHP): " . $compressionResult['message']);
-        } elseif (in_array($extension, ['webm', 'ogg', 'opus'])) {
-            error_log("Audio upload (already compressed format): " . $audio_file['size'] . ' bytes');
-        } else {
-            error_log("Audio upload (format: " . $extension . ", no compression)");
-        }
+    try {
+        $coverStored = security_store_uploaded_file($_FILES['cover_file'], $coverUploadDir, $coverAllowed, 'cover_', 5 * 1024 * 1024);
+        $dbCoverPath = $coverStored['filename'];
+    } catch (RuntimeException $e) {
+        $_SESSION['warning'] = 'Обложка не загружена: ' . $e->getMessage();
     }
+} elseif (isset($_FILES['cover_file']) && ($_FILES['cover_file']['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
+    $_SESSION['warning'] = 'У вас нет прав на загрузку обложки.';
 }
 
-$db_audio_path = $audio_unique_name;
-//Обработка файла обложки.
-$db_cover_path = null;
-if ($current_user_lvl >= 3 && isset($_FILES['cover_file']) && $_FILES['cover_file']['error'] === UPLOAD_ERR_OK) {
-    $cover_file = $_FILES['cover_file'];
-    $cover_allowed_types = ['image/jpeg', 'image/png'];
-    $cover_max_size = 5 * 1024 * 1024;
-    if (!in_array($cover_file['type'], $cover_allowed_types)) {
-        $_SESSION['warning'] = 'Тип файла обложки не поддерживается (только JPG, PNG). Обложка не загружена.'; 
-    } elseif ($cover_file['size'] > $cover_max_size) {
-        $_SESSION['warning'] = 'Размер файла обложки превышает 5MB. Обложка не загружена.';
-    } else {
-        $cover_upload_dir = __DIR__ . '/../icon/';
-        $cover_file_extension = pathinfo($cover_file['name'], PATHINFO_EXTENSION);
-        $cover_unique_name = uniqid('cover_', true) . '.' . strtolower($cover_file_extension);
-        $cover_destination_path = $cover_upload_dir . $cover_unique_name;
-        if (!is_dir($cover_upload_dir) || !is_writable($cover_upload_dir)) {
-            error_log("Upload handler: Директория для обложек отсутствует или не доступна для записи: " . $cover_upload_dir);
-            $_SESSION['warning'] = 'Серверная ошибка при загрузке обложки. Обложка не загружена.';
-        } elseif (move_uploaded_file($cover_file['tmp_name'], $cover_destination_path)) {
-            $db_cover_path = $cover_unique_name;
-        } else {
-            $_SESSION['warning'] = 'Не удалось сохранить файл обложки.';
-        }
-    }
-} elseif (isset($_FILES['cover_file']) && $_FILES['cover_file']['error'] === UPLOAD_ERR_OK && $current_user_lvl < 3) {
-    $_SESSION['warning'] = 'У вас нет прав на загрузку обложки. Обложка не загружена.';
-}
+$dbDataUpload = date('Y-m-d H:i:s');
+$dbNsfw = 0;
 
-//Установка обложки по умолчанию, если она не была загружена.
-if (empty($db_cover_path)) {
-    $db_cover_path = 'base_cover.png';
-}
+$stmt = mysqli_prepare(
+    $conn,
+    "INSERT INTO audio (user_id, self_author, author_name, nsfw, name, path, cover_patch, data_upload)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+);
 
-//Запись в БД.
-$db_nsfw = 0;
-$db_data_upload = date('Y-m-d H:i:s', time());
-$stmt = mysqli_prepare($conn, "INSERT INTO audio (user_id, self_author, author_name, nsfw, name, path, cover_patch, data_upload) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 if (!$stmt) {
-    error_log("MySQLi prepare error: " . mysqli_error($conn));
     mysqli_close($conn);
     redirect_with_error('Ошибка подготовки запроса к базе данных.');
 }
-mysqli_stmt_bind_param($stmt, "iisissss", 
-    $current_user_id, 
-    $db_self_author, 
-    $author_name, 
-    $db_nsfw, 
-    $audio_name, 
-    $db_audio_path, 
-    $db_cover_path,
-    $db_data_upload
+
+mysqli_stmt_bind_param(
+    $stmt,
+    "iisissss",
+    $currentUserId,
+    $dbSelfAuthor,
+    $authorName,
+    $dbNsfw,
+    $audioName,
+    $dbAudioPath,
+    $dbCoverPath,
+    $dbDataUpload
 );
-if (mysqli_stmt_execute($stmt)) {
-    mysqli_stmt_close($stmt);
-    mysqli_close($conn);
-    $success_msg = 'Трек \'' . htmlspecialchars($audio_name) . '\' успешно загружен!';
-    if(isset($_SESSION['warning'])) {
-        $success_msg .= "<br><em>Примечание по обложке: " . htmlspecialchars($_SESSION['warning']) . "</em>";
-        unset($_SESSION['warning']);
-    }
-    redirect_with_success($success_msg);
-} else {
-    error_log("MySQLi execute error: " . mysqli_stmt_error($stmt));
+
+if (!mysqli_stmt_execute($stmt)) {
     mysqli_stmt_close($stmt);
     mysqli_close($conn);
     redirect_with_error('Ошибка при сохранении данных трека в базу.');
 }
-session_write_close();
+
+mysqli_stmt_close($stmt);
+mysqli_close($conn);
+
+$successMessage = "Трек '" . security_html($audioName) . "' успешно загружен!";
+if (isset($_SESSION['warning'])) {
+    $successMessage .= '<br><em>Примечание по обложке: ' . security_html((string)$_SESSION['warning']) . '</em>';
+    unset($_SESSION['warning']);
+}
+
+redirect_with_success($successMessage);

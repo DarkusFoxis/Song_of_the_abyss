@@ -68,17 +68,6 @@ function add_coins($add_coins, $coins, $conn, $userId)
     }
 }
 
-function add_gems($add_gems, $gems, $conn, $userId, $lvl)
-{
-    $new_gems = round($gems + $add_gems);
-    $sql = "UPDATE invent SET gems = '$new_gems' WHERE id_user = '$userId'";
-    if (!mysqli_query($conn, $sql)) {
-        return 'В SQL-запросе произошла ошибка. Значение new_gems: ' . $new_gems . '. Тип: ' . gettype($new_gems) . ' Ошибка SQL: ' . mysqli_error($conn);
-    } else {
-        return "Успешно получены гемы!";
-    }
-}
-
 function add_sakura($add_sakura, $sakura, $conn, $userId, $lvl)
 {
     $new_sakura = round($sakura + ($add_sakura * (1 + ($lvl /10))));

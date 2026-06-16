@@ -1,6 +1,6 @@
 <?php
-session_start();
 require_once __DIR__ . '/../../../template/auth.php';
+auth_start_session();
 auth_sync_session_from_token();
 
 header('Content-Type: application/json; charset=utf-8');

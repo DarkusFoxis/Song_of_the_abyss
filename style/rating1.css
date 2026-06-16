@@ -1,0 +1,102 @@
+.rating-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 10px 0;
+}
+.rating-buttons {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.rating-btn {
+    width: 34px;
+    height: 34px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: bold;
+    transition: all 0.2s ease;
+    user-select: none;
+    backdrop-filter: blur(4px);
+    color: rgba(255, 255, 255, 0.7);
+}
+.rating-btn:hover {
+    transform: translateY(-2px) scale(1.05);
+    background: rgba(186, 20, 126, 0.25);
+    border-color: rgba(186, 20, 126, 0.6);
+    box-shadow: 0 4px 12px rgba(186, 20, 126, 0.3);
+}
+.rating-btn-plus {
+    color: #8bc34a;
+}
+.rating-btn-plus:hover {
+    background: rgba(139, 195, 74, 0.2);
+    border-color: #8bc34a;
+    color: #d4ff7e;
+}
+.rating-btn-minus {
+    color: #ff8a80;
+}
+.rating-btn-minus:hover {
+    background: rgba(255, 138, 128, 0.2);
+    border-color: #ff8a80;
+    color: #ffb4a8;
+}
+.rating-btn.active.voted-plus {
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.8), rgba(56, 142, 60, 0.9));
+    border-color: #8bc34a;
+    color: white;
+    box-shadow: 0 0 10px rgba(76, 175, 80, 0.4);
+}
+.rating-btn.active.voted-minus {
+    background: linear-gradient(135deg, rgba(244, 67, 54, 0.8), rgba(211, 47, 47, 0.9));
+    border-color: #ff8a80;
+    color: white;
+    box-shadow: 0 0 10px rgba(244, 67, 54, 0.4);
+}
+.rating-value {
+    font-size: 16px;
+    font-weight: 700;
+    min-width: 55px;
+    text-align: center;
+    padding: 6px 12px;
+    border-radius: 40px;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(4px);
+    letter-spacing: 0.5px;
+    color: #e0e0e0;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.rating-value.positive {
+    color: #b9f6ca;
+    text-shadow: 0 0 6px rgba(76, 175, 80, 0.5);
+}
+.rating-value.negative {
+    color: #ffcdd2;
+    text-shadow: 0 0 6px rgba(244, 67, 54, 0.4);
+}
+.rating-value.neutral {
+    color: #b0bec5;
+}
+@media (max-width: 600px) {
+    .rating-container {
+        gap: 8px;
+    }
+    .rating-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+        border-radius: 10px;
+    }
+    .rating-value {
+        font-size: 14px;
+        min-width: 48px;
+        padding: 4px 8px;
+    }
+}

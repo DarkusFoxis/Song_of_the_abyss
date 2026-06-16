@@ -2,10 +2,17 @@
 require_once("./system/config.php");
 require_once("./system/tools_check.php");
 
-$API_KEY = "ABYSS2445$#@-5211XRTW";
+$apiKey = app_require_secret('mail_api_key');
+$headers = function_exists('getallheaders') ? getallheaders() : [];
+$providedApiKey = '';
+foreach ($headers as $headerName => $headerValue) {
+    if (strcasecmp((string)$headerName, 'X-API-KEY') === 0) {
+        $providedApiKey = is_string($headerValue) ? $headerValue : '';
+        break;
+    }
+}
 
-$headers = getallheaders();
-if (($headers['X-API-KEY'] ?? '') !== $API_KEY) {
+if ($providedApiKey === '' || !hash_equals($apiKey, $providedApiKey)) {
     http_response_code(403);
     echo json_encode(["error" => "Forbidden"]);
     exit;

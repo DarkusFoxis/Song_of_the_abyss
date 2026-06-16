@@ -1,6 +1,6 @@
 <?php
-session_start();
 require_once __DIR__ . '/../../template/auth.php';
+auth_start_session();
 auth_sync_session_from_token();
 
 if (!isset($_SESSION['user'])) die(json_encode(['error' => 'Unauthorized']));
@@ -272,4 +272,3 @@ switch ($action) {
 }
 
 $conn->close();
-

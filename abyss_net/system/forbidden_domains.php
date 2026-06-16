@@ -1,7 +1,7 @@
 <?php
 return [
 // Социальные сети и видеохостинги.
-'vk.com','vkontakte.ru','userapi.com','tiktok.com','tiktokcdn.com','musical.ly','rutube.ru','meta.com','instagram.com',
+'vk.com','vkontakte.ru','userapi.com','tiktok.com','tiktokcdn.com','musical.ly','rutube.ru','meta.com','instagram.com','max.ru', 'telega.me',
 // Интернет-магазины.
 'ozon.ru','wildberries.ru','market.yandex.ru','aliexpress.ru','aliexpress.com','amazon.com','ebay.com','lamoda.ru','citilink.ru','dns-shop.ru','eldorado.ru','mvideo.ru','sbermegamarket.ru','leroymerlin.ru','castorama.ru','fixprice.ru','perekrestok.ru','magnit.ru','lenta.com','auchan.ru','okeydostavka.ru',
 // Государственные сервисы.

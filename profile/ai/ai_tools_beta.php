@@ -1,6 +1,7 @@
 <?php
-session_start();
 require_once __DIR__ . '/../../template/auth.php';
+
+auth_start_session();
 auth_sync_session_from_token();
 $authUser = auth_require_user('/profile/login');
 if (!isset($_SESSION['user'])) {
@@ -13,10 +14,11 @@ if (!isset($_SESSION['user'])) {
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<?php echo security_csrf_meta_tags(); ?>
 <title>DarkAI</title>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css">
+<script src="./js/marked.min.js"></script>
+<link rel="stylesheet" href="../../style/all.min.css">
+<link rel="stylesheet" href="../../style/bootstrap.min.css">
 <style>
 :root {
     --bg-primary: #212121;
@@ -744,12 +746,11 @@ textarea.message-input::placeholder {
             <div class="input-box">
                 <div class="input-row">
                     <select class="model-select" id="modelSelect">
+                        <option value="google/gemma-4-31b-it">Gemma 4 31b BETA</option>
                         <option value="mistralai/mistral-large-3-675b-instruct-2512">Mistral Large 3</option>
-                        <option value="mistralai/devstral-2-123b-instruct-2512">Devstral 2</option>
                         <option value="openai/gpt-oss-120b">GPT-OSS-120B</option>
                         <option value="z-ai/glm4.7">GLM 4.7</option>
-                        <option value="nvidia/nemotron-3-nano-30b-a3b">Nemotron 3 Nano</option>
-                        <option value="moonshotai/kimi-k2-instruct-0905">Kimi K2</option>
+                        <option value="nvidia/nemotron-3-super-120b-a12b">Nemotron 3 Super</option>
                         <option value="stepfun-ai/step-3.5-flash">Step 3.5 Flash</option>
                     </select>
                     <input type="text" class="user-display" id="userName" readonly value="<?= htmlspecialchars($_SESSION['username']) ?>">
@@ -769,6 +770,7 @@ textarea.message-input::placeholder {
 <script src="../../js/jquery-3.7.1.min.js"></script>
 <script>
 const TOOLS_PROXY = './tools_proxy.php';
+const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 const HIST_KEY = 'darkai_histories_v2';
 const CUR_KEY = 'darkai_current_v2';
 const USER_KEY = 'darkai_user_v2';
@@ -1281,7 +1283,10 @@ async function sendMessage() {
     try {
         const response = await fetch(TOOLS_PROXY, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': CSRF_TOKEN
+            },
             body: JSON.stringify(payload),
             signal: abortController.signal
         });
@@ -1488,7 +1493,10 @@ async function processToolCalls(toolCalls) {
         try {
             const response = await fetch(TOOLS_PROXY, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': CSRF_TOKEN
+                },
                 body: JSON.stringify(payload),
                 signal: abortController.signal
             });
@@ -1644,7 +1652,18 @@ async function toolArtGenerate(prompt, n_prompt, steps, message) {
     const s = steps || 50;
     const n_p = n_prompt || "18+, nsfw";
     setStatus('DarkAI рисует картину…');
-    const r = await fetch('./tools/art_generate?prompt='+ encodeURIComponent(prompt) +'&steps=' + encodeURIComponent(s) +'&n_prompt=' + encodeURIComponent(n_p));
+    const r = await fetch('./tools/art_generate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': CSRF_TOKEN
+        },
+        body: JSON.stringify({
+            prompt: prompt,
+            steps: s,
+            n_prompt: n_p
+        })
+    });
     if (!r.ok) return { error: 'Не удалось начать генерацию арта' };
     const src = await r.text();
     if (src === "No arts left") {

@@ -1,7 +1,7 @@
 <?php
 require_once("config.php");
-session_start();
 require_once __DIR__ . '/../../../template/auth.php';
+auth_start_session();
 auth_sync_session_from_token();
 $authUser = auth_require_user('/profile/login');
 
@@ -24,6 +24,5 @@ if (!$row || $row['lvl'] < 2 || $row['mail'] != 1) {
 
 $user_id = $row['id'];
 $user_lvl = $row['lvl'];
-
 
 

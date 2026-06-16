@@ -6,7 +6,7 @@ auth_sync_session_from_token(); ?>
 <head>
     <title>Snake Game</title>
     <link rel="icon" href="./img/food.png">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css">
+	<link rel="stylesheet" href="./style/bootstrap.min.css">
     <link rel="stylesheet" href="./style/style_snake.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@200;300&display=swap" rel="stylesheet">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">

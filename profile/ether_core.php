@@ -1,6 +1,6 @@
 <?php
-session_start();
 require_once __DIR__ . '/../template/auth.php';
+auth_start_session();
 auth_sync_session_from_token();
 require_once '../template/conn.php';
 $conn = mysqli_connect($host, $log, $password_sql, $database);
@@ -23,6 +23,9 @@ try {
     $inventory = getInventory($conn, $user['id']);
 
     $action = $_POST['action'] ?? $_GET['action'] ?? '';
+    if ($action !== 'update_prices') {
+        security_require_csrf(true);
+    }
 
     switch ($action) {
         case 'update_prices':
@@ -304,4 +307,3 @@ function handleEtherPurchase(mysqli $conn, int $userId, array $inventory, string
     }
 }
 session_write_close();
-

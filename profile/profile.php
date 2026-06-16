@@ -1,8 +1,8 @@
 <?php
 session_start();
 require_once __DIR__ . '/../template/auth.php';
+require_once __DIR__ . '/../abyss_net/post_helpers.php';
 auth_sync_session_from_token();
-auth_require_user('/profile/login');
 require_once '../template/conn.php';
     $conn = new mysqli($host, $log, $password_sql, $database);
     if ($conn->connect_error) {
@@ -44,8 +44,14 @@ require_once '../template/conn.php';
         $border_color = '#FFD700';
     }
 
-    $stmt = $conn->prepare("SELECT * FROM post WHERE id_user = ? ORDER BY data DESC");
-    $stmt->bind_param("i", $userId);
+	    $canViewNsfw = nsfw_user_has_access($currentUser);
+	    if ($canViewNsfw) {
+	        $stmt = $conn->prepare("SELECT * FROM post WHERE id_user = ? ORDER BY data DESC");
+	        $stmt->bind_param("i", $userId);
+	    } else {
+	        $stmt = $conn->prepare("SELECT * FROM post WHERE id_user = ? AND NSFW = 0 ORDER BY data DESC");
+	        $stmt->bind_param("i", $userId);
+	    }
     $stmt->execute();
     $postsResult = $stmt->get_result();
     $posts = $postsResult->fetch_all(MYSQLI_ASSOC);
@@ -72,12 +78,10 @@ require_once '../template/conn.php';
 <head>
     <title>Профиль <?php echo htmlspecialchars($user['username']); ?></title>
     <link rel = "icon" href = "../img/icon.png">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="../style/bootstrap.min.css">
     <link rel = "stylesheet" href = "../style/style.css">
     <link rel="stylesheet" href="../style/style_profile.css">
     <link rel = "stylesheet" href = "../style/player.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@200;300&amp;display=swap" rel="stylesheet">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -89,6 +93,131 @@ require_once '../template/conn.php';
     <meta property="og:description" content="Познакомьтесь с <?php echo htmlspecialchars($head . ' ' . $user['username']); ?>!"/>
     <style>
         .profile-container{border:2px solid <?php echo $border_color; ?>;max-width:800px;margin:20px auto;background:linear-gradient(135deg, rgba(34, 34, 34, 0.9) 0%, rgba(15, 15, 30, 0.95) 100%);padding:25px;border-radius:15px;box-shadow:0 5px 20px rgba(0, 0, 0, 0.7);color:#eee;font-family:'Montserrat Alternates',sans-serif;}
+        .photo-modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            animation: fadeIn 0.3s ease;
+        }
+        .photo-modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .photo-modal-content {
+            position: relative;
+            width: 95vw;
+            height: 95vh;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+        }
+        .photo-modal-img-wrapper {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .photo-modal img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 10px;
+            cursor: grab;
+            user-select: none;
+            transition: transform 0.1s ease;
+        }
+        .photo-modal img:active {
+            cursor: grabbing;
+        }
+        .photo-modal-controls {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 102;
+        }
+        .photo-modal-buttons {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            pointer-events: auto;
+        }
+        .photo-modal-close {
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.7);
+            border: none;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .photo-modal-close:hover {
+            background: rgba(255, 0, 0, 0.8);
+            transform: scale(1.1);
+        }
+        .photo-modal-nav {
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.7);
+            border: none;
+            padding: 20px 15px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            height: fit-content;
+            align-self: center;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .photo-modal-nav:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .photo-modal-nav.prev {
+            left: 15px;
+            pointer-events: auto;
+        }
+        .photo-modal-nav.next {
+            right: 15px;
+            pointer-events: auto;
+        }
+        .photo-modal-info {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            pointer-events: auto;
+            z-index: 102;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
         .profile-header{text-align:center;margin-bottom:25px;}
         .profile-header img{width:150px;height:150px;border-radius:50%;border:5px solid <?php echo $color; ?>;object-fit:cover;box-shadow:0 0 15px rgba(0, 0, 0, 0.5);}
         .profile-header h1,h6{color:<?php echo $color; ?>;margin-top:12px;font-weight:600;}
@@ -97,6 +226,36 @@ require_once '../template/conn.php';
         .post{background:linear-gradient(135deg, rgba(50, 50, 50, 0.8) 0%, rgba(20, 20, 40, 0.9) 100%);padding:20px;margin-bottom:20px;border-radius:12px;color:#eee;box-shadow:0 3px 10px rgba(0, 0, 0, 0.4);border-left:4px solid <?php echo $color; ?>;}
         .profile-section {margin-top: 30px;padding-top: 20px;border-top: 1px solid rgba(255, 255, 255, 0.1);width:100%;}
         .ether{border-radius:20px;padding:8px 15px;background:radial-gradient(circle,rgba(106, 61, 255, 0.5) 0%, rgba(40, 0, 56, 0.5) 100%);font-weight:bold;display:inline-block;margin-top:10px;}
+        .post-tags {
+            margin: 10px 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .post-tags .tag-link {
+            display: inline-block;
+            padding: 4px 12px;
+            background: rgba(186, 20, 126, 0.3);
+            border-radius: 16px;
+            font-size: 13px;
+            color: #fff;
+            text-decoration: none;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .post-tags .tag-link:hover {
+            background: rgba(186, 20, 126, 0.6);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+        .media-item img {
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .media-item img:hover {
+            transform: scale(1.02);
+        }
     </style>
 </head>
 <body>
@@ -133,6 +292,22 @@ require_once '../template/conn.php';
                         </div>
                     </div>
                 </div>
+                <div id="photoModal" class="photo-modal">
+                    <div class="photo-modal-content">
+                        <div class="photo-modal-img-wrapper">
+                            <img id="modalPhoto" src="" alt="Увеличенное фото">
+                        </div>
+                        <div class="photo-modal-controls">
+                            <div class="photo-modal-buttons">
+                                <button class="photo-modal-close" onclick="closePhotoModal()">&times;</button>
+                                <div></div>
+                            </div>
+                            <button class="photo-modal-nav prev" onclick="prevPhoto()">&#10094;</button>
+                            <button class="photo-modal-nav next" onclick="nextPhoto()">&#10095;</button>
+                            <div class="photo-modal-info" id="photoInfo">Zoom: 100% | Scroll: Приблизить | Drag: Переместить</div>
+                        </div>
+                    </div>
+                </div>
                 <div class="profile-container">
                     <div class="profile-header">
                         <img src="./avatars/<?php echo htmlspecialchars($user['avatar']); ?>" alt="Аватар <?php echo htmlspecialchars($user['username']); ?>"  loading="lazy" onerror="this.src='../img/default_avatar.png';">
@@ -158,7 +333,7 @@ require_once '../template/conn.php';
                     </div>
                     <div class="profile-info">
                         <p class="bio"><?php echo $user['BIO'] ? nl2br($user['BIO']) : '<span class="no-content">Пользователь не добавил описание.</span>'; ?></p>
-                        <?php if ($user['NSFW'] == 1): ?>
+	                        <?php if ((int)$user['NSFW'] === 1 && (int)$user['CONFIRM_NSFW'] === 1 && $canViewNsfw): ?>
                             <p class="nsfw">Имеет доступ к 18+ контенту.</p>
                         <?php endif; ?>
                     </div>
@@ -178,20 +353,33 @@ require_once '../template/conn.php';
                             <?php foreach ($posts as $post): ?>
                             <div class="post">
                                 <h3><a class="link" href="../abyss_net/post?id=<?php echo $post["id_post"];?>"><?php echo $post['title']; ?></a></h3>
+                                <?php
+                                $postTags = get_post_tags($conn, (int)$post['id_post']);
+                                if ($postTags !== []) : ?>
+                                    <div class="post-tags">
+                                        <?php foreach ($postTags as $tag) : ?>
+                                            <a href="../abyss_net/main?filter=recent&tag=<?php echo urlencode($tag); ?>" class="tag-link">#<?php echo htmlspecialchars($tag); ?></a>
+                                        <?php endforeach; ?>
+                                    </div>
+                                <?php endif; ?>
                                 <p><?php echo $post['post'] ? nl2br($post['post']) : '<span class="no-content">Пользователь решил не комментировать свой пост...</span>'; ?></p>
                                 <div class="media">
                                     <?php 
                                     $media_files = !empty($post['media']) ? explode(',', $post['media']) : [];
                                     if (!empty($media_files)) : ?>
                                         <div class="media-container">
-                                            <?php foreach ($media_files as $media_file) : 
-                                                $extension = strtolower(pathinfo($media_file, PATHINFO_EXTENSION));
-                                                $safe_media_file = htmlspecialchars($media_file);
-                                            ?>
+                                            <?php foreach ($media_files as $media_file_index => $media_file) : 
+	                                                $extension = strtolower(pathinfo($media_file, PATHINFO_EXTENSION));
+	                                                $safe_media_file = htmlspecialchars($media_file);
+	                                                $media_url = "../abyss_net/media/" . $safe_media_file;
+	                                                if (abyss_post_is_nsfw($post)) {
+	                                                    $media_url = "../../private/abyss_net/media/" . $safe_media_file;
+	                                                }
+	                                            ?>
                                                 <div class="media-item">
                                                     <?php if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp','jfif'])) : ?>
                                                         <span class="file-type">Изображение</span>
-                                                        <img src="../abyss_net/media/<?php echo $safe_media_file; ?>" alt="Медиа из поста" loading="lazy">
+                                                        <img src="<?php echo $media_url; ?>" alt="Медиа из поста" loading="lazy" onclick="openPhotoModal(this, <?php echo $post['id_post']; ?>, <?php echo $media_file_index; ?>)" data-post-id="<?php echo $post['id_post']; ?>" data-media-index="<?php echo $media_file_index; ?>">
                                                     <?php elseif ($extension === 'mp3') : ?>
                                                         <button class="play-button" onclick="playButtonStart('<?php echo htmlspecialchars($post['title'], ENT_QUOTES) . ' - ' . htmlspecialchars(explode('_',$media_file)[1] ?? 'Аудио', ENT_QUOTES); ?>', '../abyss_net/media/<?php echo $safe_media_file; ?>')">
                                                             ▶️ Воспроизвести <?php echo htmlspecialchars(explode('_',$media_file)[1] ?? 'Аудио'); ?>
@@ -234,10 +422,166 @@ require_once '../template/conn.php';
     </div>
 </div>
 <script src='../js/player.js'></script>
+<script>
+let currentPhotoModal = null;
+let currentPostId = null;
+let currentMediaIndex = 0;
+let allPostsPhotos = {};
+let photoZoom = 1;
+let photoOffsetX = 0;
+let photoOffsetY = 0;
+let isDraggings = false;
+let dragStartX = 0;
+let dragStartY = 0;
+
+function initPhotoModal() {
+    const mediaItems = document.querySelectorAll('[data-post-id]');
+    mediaItems.forEach(item => {
+        const postId = item.getAttribute('data-post-id');
+        const mediaIndex = parseInt(item.getAttribute('data-media-index'));
+        
+        if (!allPostsPhotos[postId]) {
+            allPostsPhotos[postId] = [];
+        }
+        allPostsPhotos[postId][mediaIndex] = item.src;
+    });
+}
+
+function resetPhotoTransform() {
+    photoZoom = 1;
+    photoOffsetX = 0;
+    photoOffsetY = 0;
+    updatePhotoTransform();
+}
+
+function updatePhotoTransform() {
+    const modalImg = document.getElementById('modalPhoto');
+    if (modalImg) {
+        modalImg.style.transform = `scale(${photoZoom}) translate(${photoOffsetX}px, ${photoOffsetY}px)`;
+    }
+    const photoInfo = document.getElementById('photoInfo');
+    if (photoInfo) {
+        const zoomPercent = Math.round(photoZoom * 100);
+        photoInfo.textContent = `Zoom: ${zoomPercent}% | Scroll: Приблизить | Drag: Переместить`;
+    }
+}
+
+function openPhotoModal(img, postId, mediaIndex) {
+    const modal = document.getElementById('photoModal');
+    const modalImg = document.getElementById('modalPhoto');
+    
+    resetPhotoTransform();
+    currentPhotoModal = img.src;
+    currentPostId = postId;
+    currentMediaIndex = mediaIndex;
+    
+    modalImg.src = img.src;
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    
+    const wrapper = document.querySelector('.photo-modal-img-wrapper');
+    if (wrapper) {
+        wrapper.addEventListener('wheel', handlePhotoZoom, false);
+        wrapper.addEventListener('mousedown', handlePhotoDragStart, false);
+        wrapper.addEventListener('mousemove', handlePhotoDragMove, false);
+        wrapper.addEventListener('mouseup', handlePhotoDragEnd, false);
+        wrapper.addEventListener('mouseleave', handlePhotoDragEnd, false);
+    }
+    
+    const contentArea = document.querySelector('.photo-modal-content');
+    if (contentArea) {
+        contentArea.addEventListener('click', function(e) {
+            if (e.target === contentArea) {
+                closePhotoModal();
+            }
+        });
+    }
+    
+    const handleEscape = function(e) {
+        if (e.key === 'Escape') {
+            closePhotoModal();
+            document.removeEventListener('keydown', handleEscape);
+        }
+    };
+    document.addEventListener('keydown', handleEscape);
+}
+
+function closePhotoModal() {
+    const modal = document.getElementById('photoModal');
+    const wrapper = document.querySelector('.photo-modal-img-wrapper');
+    
+    if (wrapper) {
+        wrapper.removeEventListener('wheel', handlePhotoZoom);
+        wrapper.removeEventListener('mousedown', handlePhotoDragStart);
+        wrapper.removeEventListener('mousemove', handlePhotoDragMove);
+        wrapper.removeEventListener('mouseup', handlePhotoDragEnd);
+        wrapper.removeEventListener('mouseleave', handlePhotoDragEnd);
+    }
+    
+    modal.classList.remove('active');
+    document.body.style.overflow = 'auto';
+    currentPhotoModal = null;
+    currentPostId = null;
+    resetPhotoTransform();
+}
+
+function handlePhotoZoom(e) {
+    e.preventDefault();
+    const zoomSpeed = 0.1;
+    const oldZoom = photoZoom;
+    photoZoom += (e.deltaY < 0 ? zoomSpeed : -zoomSpeed);
+    photoZoom = Math.max(0.5, Math.min(5, photoZoom));
+    updatePhotoTransform();
+}
+
+function handlePhotoDragStart(e) {
+    if (photoZoom > 1) {
+        isDraggings = true;
+        dragStartX = e.clientX - photoOffsetX;
+        dragStartY = e.clientY - photoOffsetY;
+    }
+}
+
+function handlePhotoDragMove(e) {
+    if (!isDraggings) return;
+    photoOffsetX = e.clientX - dragStartX;
+    photoOffsetY = e.clientY - dragStartY;
+    updatePhotoTransform();
+}
+
+function handlePhotoDragEnd() {
+    isDraggings = false;
+}
+
+function nextPhoto() {
+    if (!currentPostId || !allPostsPhotos[currentPostId]) return;
+    
+    const photos = allPostsPhotos[currentPostId];
+    const nextIndex = (currentMediaIndex + 1) % photos.length;
+    currentMediaIndex = nextIndex;
+    
+    const modalImg = document.getElementById('modalPhoto');
+    modalImg.src = photos[nextIndex];
+    resetPhotoTransform();
+}
+
+function prevPhoto() {
+    if (!currentPostId || !allPostsPhotos[currentPostId]) return;
+    
+    const photos = allPostsPhotos[currentPostId];
+    const prevIndex = (currentMediaIndex - 1 + photos.length) % photos.length;
+    currentMediaIndex = prevIndex;
+    
+    const modalImg = document.getElementById('modalPhoto');
+    modalImg.src = photos[prevIndex];
+    resetPhotoTransform();
+}
+
+document.addEventListener('DOMContentLoaded', initPhotoModal);
+</script>
 <?php require_once '../template/video_plugin.html'; ?>
 </body>
 </html>
 <?php 
 session_write_close();
 ?>
-

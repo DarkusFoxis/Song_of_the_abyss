@@ -1,6 +1,7 @@
 <?php
-session_start();
 require_once __DIR__ . '/../template/auth.php';
+require_once __DIR__ . '/../template/nsfw.php';
+auth_start_session();
 auth_sync_session_from_token();
 $authUser = auth_require_user('/profile/login');
 if(!isset($_SESSION['user'])) {
@@ -49,15 +50,14 @@ mysqli_close($conn);
 <html lang="ru">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <?php echo "<title>Settings " . $_SESSION['username'] . "</title>"; ?>
+    <title>Settings <?php echo security_html((string)($_SESSION['username'] ?? '')); ?></title>
     <link rel="icon" href="../img/icon.png">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="../style/bootstrap.min.css">
     <link rel="stylesheet" href="../style/style.css">
     <link rel="stylesheet" href="../style/style_setting1.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <?php echo security_csrf_meta_tags(); ?>
 </head>
 <body>
 <div class="navbar">
@@ -130,10 +130,11 @@ mysqli_close($conn);
                 }
                 $login = $_SESSION['user'];
                 $user_query = "SELECT * FROM users WHERE login = '$login'";
-                $result = $conn->query($user_query);
-                $user = $result->fetch_assoc();
-                
-                $data_query = "SELECT * FROM personal_data WHERE login = '$login'";
+	                $result = $conn->query($user_query);
+	                $user = $result->fetch_assoc();
+	                $nsfwConfirmBlocked = nsfw_user_is_confirm_blocked($user);
+	                
+	                $data_query = "SELECT * FROM personal_data WHERE login = '$login'";
                 $result_data = $conn->query($data_query);
                 $data_beta = null;
                 if ($result_data->num_rows > 0) {
@@ -178,7 +179,11 @@ mysqli_close($conn);
 
             <section id="status" class="settings-card hidden">
                 <h3><span class="card-icon">💬</span>Изменение статуса</h3>
-                <form action="setting_core" method="post">
+	                <?php if ($nsfwConfirmBlocked): ?>
+	                    <div class="warning-box"><?php echo htmlspecialchars(nsfw_manual_confirmation_notice()); ?></div>
+	                <?php else: ?>
+	                <form action="setting_core" method="post">
+                    <?php echo security_csrf_input(); ?>
 <input type="hidden" name="action" value="bio_redact">
                     <div class="form-group">
                         <label class="form-label">Ваш текущий статус:</label>
@@ -189,7 +194,8 @@ mysqli_close($conn);
                         <textarea name="bio" class="form-control" minlength="10" maxlength="250" placeholder="Расскажите о себе..." required></textarea>
                     </div>
                     <button type="submit" name="submit" class="btn"><span class="btn-icon">💾</span>Обновить статус</button>
-                </form>
+	                </form>
+	                <?php endif; ?>
             </section>
 
             <section id="avatar" class="settings-card hidden">
@@ -199,6 +205,7 @@ mysqli_close($conn);
                     <img src="./avatars/<?php echo $user['avatar']; ?>" class="avatar-preview" alt="Current Avatar">
                 </div>
                 <form action="setting_core" method="post" enctype="multipart/form-data">
+                    <?php echo security_csrf_input(); ?>
 <input type="hidden" name="action" value="avatar">
                     <div class="form-group">
                         <label class="form-label">Выберите новый аватар:</label>
@@ -224,6 +231,7 @@ mysqli_close($conn);
             <section id="username" class="settings-card hidden">
                 <h3><span class="card-icon">✏</span>Изменение никнейма</h3>
                 <form action="setting_core" method="post">
+                    <?php echo security_csrf_input(); ?>
 <input type="hidden" name="action" value="username">
                     <div class="form-group">
                         <label class="form-label">Текущий никнейм:</label>
@@ -240,6 +248,7 @@ mysqli_close($conn);
             <section id="birthdate" class="settings-card hidden">
                 <h3><span class="card-icon">🎂</span>Дата рождения</h3>
                 <form action="setting_core" method="post">
+                    <?php echo security_csrf_input(); ?>
 <input type="hidden" name="action" value="birthdate">
                     <div class="form-group">
                         <label class="form-label">Текущая дата рождения:</label>
@@ -264,10 +273,11 @@ mysqli_close($conn);
                     <p><strong>⚠ Внимание:</strong> NSFW контент включает материалы 18+ характера. Разрешая доступ, вы подтверждаете что вам есть 18 лет и принимаете всю ответственность за просматриваемый контент.</p>
                 </div>
                 <form action="setting_core" method="post">
+                    <?php echo security_csrf_input(); ?>
 <input type="hidden" name="action" value="nsfw">
                     <div class="form-group">
                         <label class="form-label">Текущие настройки:</label>
-                        <?php if($user['NSFW']): ?>
+	                        <?php if((int)$user['NSFW'] === 1 && (int)$user['CONFIRM_NSFW'] === 1): ?>
                             <div class="success-box">✅ Доступ разрешен</div>
                         <?php else: ?>
                             <div class="warning-box">🚫 Доступ запрещен</div>
@@ -291,6 +301,7 @@ mysqli_close($conn);
             <section id="password" class="settings-card hidden">
                 <h3><span class="card-icon">🔐</span>Смена пароля</h3>
                 <form action="setting_core" method="post">
+                    <?php echo security_csrf_input(); ?>
 <input type="hidden" name="action" value="new_password">
                     <div class="form-group">
                         <label class="form-label">Текущий пароль:</label>
@@ -324,6 +335,7 @@ mysqli_close($conn);
 
                 if (mysqli_num_rows($invent_result) != 0) {
                     echo '<form action="setting_core" method="post">';
+                    echo security_csrf_input();
                     echo '<input type="hidden" name="action" value="new_title">';
 
                     echo '<div class="form-group">';
@@ -401,6 +413,7 @@ mysqli_close($conn);
                 </div>
 
                 <form id="transferForm" action="transfer" method="post">
+                    <?php echo security_csrf_input(); ?>
                     <div class="form-group">
                         <label class="form-label">Получатель:</label>
                         <select id="recipientSelect" class="form-control" required>
@@ -434,6 +447,7 @@ mysqli_close($conn);
             <section id="promocode" class="settings-card hidden">
                 <h3><span class="card-icon">🎁</span>Промокоды</h3>
                 <form id="promoForm" action="promo" method="post">
+                    <?php echo security_csrf_input(); ?>
                     <div class="form-group">
                         <label class="form-label">Введите промокод:</label>
                         <input type="text" name="promocode" class="form-control" maxlength="150" required>
@@ -455,6 +469,7 @@ mysqli_close($conn);
                     <p><strong>Подумайте, перед тем, как принять решение.</strong></p>
                 </div>
                 <form action="setting_core" method="post">
+                    <?php echo security_csrf_input(); ?>
 <input type="hidden" name="action" value="delete_account">
                     <div class="radio-group">
                         <div class="radio-item">
@@ -499,6 +514,3 @@ mysqli_close($conn);
 mysqli_close($conn);
 session_write_close();
 ?>
-
-
-

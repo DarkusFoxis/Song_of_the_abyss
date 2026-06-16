@@ -27,7 +27,7 @@ $username = $user ? $user['username'] : ('user'.$user_id);
 $stmt = $pdo->prepare("INSERT INTO mail_user (user_id, username, public_key) VALUES (?, ?, ?)");
 $stmt->execute([$user_id, $username, $publicKey]);
 
-$key_path = __DIR__ . "/../../keys/users/user_{$user_id}.pem";
+$key_path = __DIR__ . "../../../private/keys/users/user_{$user_id}.pem";
 file_put_contents($key_path, $privateKey);
 chmod($key_path, 0600);
 

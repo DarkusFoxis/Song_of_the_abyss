@@ -3,18 +3,20 @@ if (!isset($_POST['userId'])) exit("Ошибка: id не указан.");
 session_start();
 require_once __DIR__ . '/../template/auth.php';
 auth_sync_session_from_token();
+require_once __DIR__ . '/../template/nsfw.php';
 $userId = $_POST['userId'];
 require_once '../template/conn.php';
 $conn = mysqli_connect($host, $log, $password_sql, $database);
 
 $login = $_SESSION['user'];
-$user_query = "SELECT sg.lvl, u.username FROM users u JOIN site_group sg ON u.permissions = sg.name WHERE u.login = ?";
+$user_query = "SELECT sg.lvl, u.username, u.NSFW, u.AUTO_NSFW, u.CONFIRM_NSFW FROM users u JOIN site_group sg ON u.permissions = sg.name WHERE u.login = ?";
 $stmt = $conn->prepare($user_query);
 $stmt->bind_param("s", $login);
 $stmt->execute();
 $result_perm = $stmt->get_result();
 $row_perm = $result_perm->fetch_assoc();
 $stmt->close();
+$canViewNsfw = nsfw_user_has_access($row_perm);
 
 $sql = "SELECT u.*, sg.lvl FROM users u JOIN site_group sg ON u.permissions = sg.name WHERE u.id = ?";
 $stmt = $conn->prepare($sql);
@@ -86,7 +88,9 @@ if ($row = $result->fetch_assoc()) {
     $profile_html .= '<p class="donate">Поддержка проекта: ' . $row['donate'] . ' руб.</p>';
     $profile_html .= '<p class="ether">Эфир бездны: ' . number_format($row['abyss_ether'], 7) . ' ед.</p>';
     $profile_html .= '<p>Группа: <span class="badge">' . $row["permissions"] . '</span></p>';
-    $profile_html .= '<p>Доступ к NSFW: ' . $isNSFW . '</p>';
+    if ($canViewNsfw) {
+        $profile_html .= '<p>Доступ к NSFW: ' . $isNSFW . '</p>';
+    }
     $profile_html .= '<p>Последний вход: ' . $last_login . '</p>';
     $profile_html .= '</div>';
 
@@ -167,4 +171,3 @@ if ($row = $result->fetch_assoc()) {
 }
 mysqli_close($conn);
 session_write_close();
-

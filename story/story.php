@@ -1,7 +1,7 @@
 <?php
 require_once '../template/conn.php';
 if (!isset($_GET['id'])) {
-    header("Location: main.php");
+    header("Location: main");
     exit;
 }
 $story_id = intval($_GET['id']);
@@ -23,8 +23,17 @@ $conn->close();
 
 require_once '../modules/parsedown/Parsedown.php';
 $parsedown = new Parsedown();
+$parsedown->setSafeMode(false); //Отключаем экранирование HTML.
+
 $raw_content = $story['story'];
-$content = nl2br($parsedown->text($raw_content), false);
+$content = $parsedown->text($raw_content);
+
+//Разрешаем только безопасные теги.
+$allowed_tags = '<center><b><i><strong><em><br><p><hr>';
+$content = strip_tags($content, $allowed_tags);
+
+//Добавляем <br> для переносов строк.
+$content = nl2br($content, false);
 
 $story_desc = $story['description'];
 if (strlen($story_desc) > 200) {
@@ -39,13 +48,11 @@ if (strlen($story_desc) > 200) {
     <meta charset="UTF-8">
     <title><?= htmlspecialchars($story['title']) ?> - Рассказы бездны</title>
     <link rel="icon" href="../img/icon.png">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../style/bootstrap.min.css">
     <link rel="stylesheet" href="./css/story.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@200;300;400;500&display=swap" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="<?php echo $description; ?>"/>
+    <meta name="description" content="<?= htmlspecialchars($description); ?>"/>
 </head>
 <body>
     <div class="read-container">

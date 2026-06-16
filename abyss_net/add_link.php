@@ -3,6 +3,7 @@ session_start();
 require_once __DIR__ . '/../template/auth.php';
 auth_sync_session_from_token();
 $authUser = auth_require_user('/profile/login');
+require_once __DIR__ . '/../template/nsfw.php';
 require_once '../template/conn.php';
 $conn = mysqli_connect($host, $log, $password_sql, $database);
 if (!$conn) {
@@ -14,7 +15,7 @@ if (!isset($_SESSION['user'])) {
     exit;
 }
 $login = $_SESSION['user'];
-$sql_user = "SELECT u.id, u.permissions, sg.lvl FROM users u JOIN site_group sg ON u.permissions = sg.name WHERE u.login = ?";
+$sql_user = "SELECT u.id, u.permissions, u.NSFW, u.AUTO_NSFW, u.CONFIRM_NSFW, sg.lvl FROM users u JOIN site_group sg ON u.permissions = sg.name WHERE u.login = ?";
 $stmt_user = mysqli_prepare($conn, $sql_user);
 if (!$stmt_user) {
     error_log("Ошибка подготовки запроса пользователя: " . mysqli_error($conn));
@@ -31,7 +32,8 @@ if (!$user) {
     exit;
 }
 $userId = $user['id'];
-$userLevel = $user['lvl'];
+$userLevel = (int)$user['lvl'];
+$canUseNsfw = nsfw_user_has_access($user);
 $tools = "SELECT * FROM tools WHERE user_id = ?";
 $tools_query = mysqli_prepare($conn, $tools);
 mysqli_stmt_bind_param($tools_query, "i", $userId);
@@ -52,6 +54,7 @@ if (!$tools_enable['add_link']) {
 $message = '';
 $error = '';
 $hideUser = false;
+$hideUserInput = '0';
 $nsfwInput = '0';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -60,9 +63,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $description = trim($_POST['description'] ?? '');
     $keywords = trim($_POST['keywords'] ?? '');
     $hideUserInput = $_POST['hide_user'] ?? '0';
-    $nsfwInput = $_POST['nsfw'] ?? '0';
+    $nsfwInput = ($canUseNsfw && ($_POST['nsfw'] ?? '0') === '1') ? '1' : '0';
 
-    if (empty($url) || empty($title) || empty($keywords)) {
+    if (!$canUseNsfw && ($_POST['nsfw'] ?? '0') === '1') {
+         $error = "Ошибка: NSFW-контент доступен только после подтверждения возраста.";
+    } elseif (empty($url) || empty($title) || empty($keywords)) {
          $error = "Пожалуйста, заполните все обязательные поля.";
     } elseif (!filter_var($url, FILTER_VALIDATE_URL)) {
         $error = "Некорректный URL адрес.";
@@ -141,10 +146,8 @@ mysqli_close($conn);
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Add Link</title>
 <link rel="icon" href="../img/icon.png">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<link rel="stylesheet" href="../style/bootstrap.min.css">
 <link rel = "stylesheet" href = "../style/style.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@200;300&display=swap" rel="stylesheet">
 <script src="../js/jquery-3.7.1.min.js"></script>
 <style>
@@ -286,6 +289,7 @@ mysqli_close($conn);
                 <input type="text" class="form-control" id="keywords" name="keywords" placeholder="через запятую: php, javascript, космос" value="<?= isset($_POST['keywords']) ? htmlspecialchars($_POST['keywords']) : '' ?>" required>
                 <small class="form-text" style="color: #9370DB;">Укажите релевантные слова для поиска</small>
             </div>
+            <?php if ($canUseNsfw): ?>
             <div class="form-group">
                 <label class="checkbox-label">
                     <input type="checkbox" name="nsfw" value="1"
@@ -293,6 +297,7 @@ mysqli_close($conn);
                     NSFW (не безопасный) контент
                 </label>
             </div>
+            <?php endif; ?>
             <?php if ($userLevel > 3): ?>
             <div class="form-group">
                 <label class="checkbox-label">
@@ -413,6 +418,3 @@ mysqli_close($conn);
 <?php 
 session_write_close();
 ?>
-
-
-

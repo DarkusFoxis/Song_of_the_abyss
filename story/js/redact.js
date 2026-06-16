@@ -121,6 +121,7 @@ $(document).ready(function() {
         formData.append('description', desc);
         formData.append('age_limit', rating);
         formData.append('story', content);
+        formData.append('csrf_token', document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '');
         if (coverUpload[0].files[0]) {
             formData.append('icon', coverUpload[0].files[0]);
         }

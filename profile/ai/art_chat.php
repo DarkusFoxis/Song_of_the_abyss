@@ -1,6 +1,6 @@
 <?php
-session_start();
 require_once __DIR__ . '/../../template/auth.php';
+auth_start_session();
 auth_sync_session_from_token();
 $authUser = auth_require_user('/profile/login');
 if (!isset($_SESSION['user'])) {
@@ -14,8 +14,8 @@ if (!isset($_SESSION['user'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DarkAI0.1 - Генерация изображений</title>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="./js/marked.min.js"></script>
+    <link rel="stylesheet" href="../../style/bootstrap.min.css">
     <style>
         :root {
             --primary-color: #bb86fc;
@@ -607,6 +607,7 @@ if (!isset($_SESSION['user'])) {
                 <label for="model-select">Модель генерации</label>
                 <select id="model-select">
                     <option value="flux.1-schnell">Flux 1.0 Schnell</option>
+                    <option value="flux.2-klein-4b">Flux 2 klein</option>
                     <option value="stable-diffusion-3-medium">Stable Diffusion 3 Medium</option>
                 </select>
             </div>
@@ -1097,6 +1098,3 @@ if (!isset($_SESSION['user'])) {
 <?php 
 session_write_close();
 ?>
-
-
-

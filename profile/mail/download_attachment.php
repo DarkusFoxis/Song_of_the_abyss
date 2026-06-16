@@ -1,6 +1,6 @@
 <?php
-session_start();
 require_once __DIR__ . '/../../template/auth.php';
+auth_start_session();
 auth_sync_session_from_token();
 require_once("./system/tools_check.php");
 require_once("./system/config.php");
@@ -38,7 +38,7 @@ if ($user['lvl'] >= 6) {
 
     if (!$msg) die("Письмо не найдено или у вас нет прав на его просмотр.");
 
-    $key_path = __DIR__ . "/../../keys/users/user_{$user_id}.pem";
+    $key_path = app_user_private_key_path((int)$user_id);
     if (!file_exists($key_path)) die("Приватный ключ не найден.");
 
     $private_key_data = file_get_contents($key_path);
@@ -60,17 +60,15 @@ if ($user['lvl'] >= 6) {
 if (!openssl_private_decrypt($encrypted_key, $aes_key, $priv)) die("Ошибка расшифровки AES-ключа.");
 
 if (empty($msg['attachment_path'])) die("Вложение не найдено.");
-$real_path = $_SERVER['DOCUMENT_ROOT'] . '/' . $msg['attachment_path'];
+$real_path = app_mail_attachment_path((string)$msg['attachment_path']);
 if (!file_exists($real_path)) die("Файл вложения не найден.");
 
 $enc_data = file_get_contents($real_path);
 [$enc_file, $file_iv] = explode("::", $enc_data);
 $attachment = openssl_decrypt($enc_file, 'AES-256-CBC', $aes_key, 0, base64_decode($file_iv));
-$download_name = basename($msg['attachment_path']);
+$download_name = basename((string)$msg['attachment_path']);
 
 header('Content-Type: application/octet-stream');
 header('Content-Disposition: attachment; filename="' . $download_name . '"');
 echo $attachment;
 exit;
-
-

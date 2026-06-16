@@ -2,6 +2,8 @@
 require_once("./system/tools_check.php");
 require_once("./system/config.php");
 
+security_require_csrf(true);
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     $_SESSION['compose_error'] = "Невозможно отправить пустое, или не очень, письмо.";
     header("Location: compose");
@@ -9,10 +11,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $to = trim($_POST['to'] ?? '');
-$subject = trim($_POST['subject'] ?? '');
-$body = trim($_POST['body'] ?? '');
+$subject = mb_substr(trim((string)($_POST['subject'] ?? '')), 0, 255);
+$body = mb_substr(trim((string)($_POST['body'] ?? '')), 0, 20000);
 
-if (!preg_match('/^([a-zA-Z0-9_ .]+)@abyss$/', $to, $matches)) {
+if (!preg_match('/^([a-zA-Z0-9_ .а-яА-ЯёЁ]+)@abyss$/u', $to, $matches)) {
     $_SESSION['compose_error'] = "Неверный формат адреса получателя.";
     header('Location: compose');
     exit;
@@ -90,18 +92,29 @@ $stmt->execute([
 $mail_id = $pdo->lastInsertId();
 
 if (!empty($_FILES['attachment']['tmp_name'])) {
+    if (($_FILES['attachment']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+        $_SESSION['compose_error'] = "Ошибка загрузки вложения.";
+        header("Location: compose");
+        exit;
+    }
+    if (($_FILES['attachment']['size'] ?? 0) > 10 * 1024 * 1024) {
+        $_SESSION['compose_error'] = "Вложение слишком большое. Максимум 10 МБ.";
+        header("Location: compose");
+        exit;
+    }
     $file_data = file_get_contents($_FILES['attachment']['tmp_name']);
     $file_name = basename($_FILES['attachment']['name']);
     $file_iv = openssl_random_pseudo_bytes(16);
     $encrypted_file = openssl_encrypt($file_data, 'AES-256-CBC', $aes_key, 0, $file_iv);
 
-    $rel_path = 'encrypted_attachments/' . $mail_id . "_" . time() . "_" . preg_replace("/[^a-zA-Z0-9_.-]/", "", $file_name);
-    $abs_path = $_SERVER['DOCUMENT_ROOT'] . '/' . $rel_path;
+    app_private_ensure_dir('encrypted_attachments');
+    $stored_name = $mail_id . "_" . time() . "_" . preg_replace("/[^a-zA-Z0-9_.-]/", "", $file_name);
+    $abs_path = app_mail_attachment_path($stored_name);
     file_put_contents($abs_path, $encrypted_file . "::" . base64_encode($file_iv));
 
     $stmt = $pdo->prepare("UPDATE mail SET attachment_path = ? WHERE id = ?");
     $stmt->execute([
-        $rel_path,
+        $stored_name,
         $mail_id
     ]);
 }

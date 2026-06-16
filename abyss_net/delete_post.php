@@ -1,50 +1,82 @@
 <?php
-session_start();
 require_once __DIR__ . '/../template/auth.php';
+require_once __DIR__ . '/../template/conn.php';
+require_once __DIR__ . '/post_helpers.php';
+
+auth_start_session();
 auth_sync_session_from_token();
-require_once '../template/conn.php';
+
+$currentUser = auth_get_current_user();
+if ($currentUser === null) {
+    echo "Ошибка: Необходимо авторизоваться.";
+    exit;
+}
+
+security_require_csrf(true);
+
 $conn = mysqli_connect($host, $log, $password_sql, $database);
 if (!$conn) {
     echo "Ошибка соединения: " . mysqli_connect_error();
     exit;
 }
-if (!isset($_SESSION['user'])) {
-    echo "Ошибка: Необходимо авторизоваться.";
-    exit;
-}
-$id_post = intval($_POST['id_post'] ?? 0);
-if ($id_post <= 0) {
+mysqli_set_charset($conn, 'utf8mb4');
+
+$idPost = (int)($_POST['id_post'] ?? 0);
+if ($idPost <= 0) {
     echo "Ошибка: Некорректный ID поста.";
+    mysqli_close($conn);
     exit;
 }
-$sql = "SELECT * FROM post WHERE id_post = $id_post";
-$result = $conn->query($sql);
-if ($result->num_rows === 0) {
+
+$postStmt = $conn->prepare("SELECT id_user, media, NSFW FROM post WHERE id_post = ? LIMIT 1");
+$postStmt->bind_param('i', $idPost);
+$postStmt->execute();
+$post = $postStmt->get_result()->fetch_assoc();
+$postStmt->close();
+
+if (!$post) {
     echo "Ошибка: Пост не найден.";
+    mysqli_close($conn);
     exit;
 }
-$post = $result->fetch_assoc();
-$user_query = "SELECT * FROM users WHERE login = '" . mysqli_real_escape_string($conn, $_SESSION['user']) . "'";
-$user_result = $conn->query($user_query);
-$user = $user_result->fetch_assoc();
-if ($post['id_user'] != $user['id']) {
+
+$userStmt = $conn->prepare("SELECT id FROM users WHERE login = ? LIMIT 1");
+$userStmt->bind_param('s', $currentUser['login']);
+$userStmt->execute();
+$user = $userStmt->get_result()->fetch_assoc();
+$userStmt->close();
+
+if (!$user || (int)$post['id_user'] !== (int)$user['id']) {
     echo "Ошибка: Нет прав на удаление этого поста.";
+    mysqli_close($conn);
     exit;
 }
+
 if (!empty($post['media'])) {
-    $media_files = explode(',', $post['media']);
-    foreach ($media_files as $file) {
-        $file_path = __DIR__ . '/media/' . $file;
-        if (file_exists($file_path)) {
-            unlink($file_path);
+    foreach (explode(',', (string)$post['media']) as $file) {
+	        $filePath = abyss_post_media_path((string)$file, abyss_post_is_nsfw($post));
+        if (is_file($filePath)) {
+            unlink($filePath);
         }
     }
 }
-$conn->query("DELETE FROM post WHERE id_post = $id_post");
-$conn->query("DELETE FROM comment WHERE id_post = $id_post");
-$conn->query("DELETE FROM url WHERE url LIKE '%id=$id_post'");
+
+$deletePostStmt = $conn->prepare("DELETE FROM post WHERE id_post = ?");
+$deletePostStmt->bind_param('i', $idPost);
+$deletePostStmt->execute();
+$deletePostStmt->close();
+
+$deleteCommentsStmt = $conn->prepare("DELETE FROM comment WHERE id_post = ?");
+$deleteCommentsStmt->bind_param('i', $idPost);
+$deleteCommentsStmt->execute();
+$deleteCommentsStmt->close();
+
+$urlLike = '%id=' . $idPost;
+$deleteUrlStmt = $conn->prepare("DELETE FROM url WHERE url LIKE ?");
+$deleteUrlStmt->bind_param('s', $urlLike);
+$deleteUrlStmt->execute();
+$deleteUrlStmt->close();
 
 echo "Пост успешно удалён.";
+mysqli_close($conn);
 session_write_close();
-
-

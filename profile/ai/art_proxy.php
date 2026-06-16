@@ -1,14 +1,16 @@
 <?php
-session_start();
 require_once __DIR__ . '/../../template/auth.php';
+auth_start_session();
 auth_sync_session_from_token();
 header('Access-Control-Allow-Origin: so-ta.ru');
 header('Access-Control-Allow-Methods: POST, OPTIONS, GET');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('Access-Control-Allow-Headers: Content-Type, Authorization, X-CSRF-Token');
 header('Content-Type: application/json; charset=utf-8');
 ini_set('display_errors', 0);
 ini_set('log_errors', 1);
 ini_set('error_log', 'api_proxy_errors.log');
+
+$API_KEY = app_nvidia_api_key();
 
 function sendError($message, $code = 500, $details = null) {
     http_response_code($code);
@@ -31,6 +33,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 if (!isset($_SESSION['user'])) {
     sendError('Authentication required', 401);
 }
+
+security_require_csrf(true);
 
 require_once '../../template/conn.php';
 $conn = mysqli_connect($host, $log, $password_sql, $database);
@@ -66,7 +70,7 @@ if (!isset($input['prompt'])) {
 }
 
 $model = $input['model'] ?? 'flux.1-schnell';
-$supported_models = ['flux.1-schnell', 'stable-diffusion-3-medium'];
+$supported_models = ['flux.1-schnell', 'stable-diffusion-3-medium','flux.2-klein-4b'];
 if (!in_array($model, $supported_models)) {
     sendError('Unsupported model: ' . $model, 400);
 }
@@ -106,7 +110,7 @@ if ($tools['arts'] <= 0 && $tools['bonus_arts'] <= 0) {
 }
 
 if ($model === 'flux.1-schnell') {
-    $url = '';
+    $nvidia_url = 'https://ai.api.nvidia.com/v1/genai/black-forest-labs/flux.1-schnell';
     $payload = [
         "prompt" => $input['prompt'],
         "width" => $input['width'] ?? 1024,
@@ -115,7 +119,7 @@ if ($model === 'flux.1-schnell') {
         "steps" => $input['steps'] ?? 4
     ];
 } else if ($model === 'stable-diffusion-3-medium') {
-    $url = '';
+    $nvidia_url = 'https://ai.api.nvidia.com/v1/genai/stabilityai/stable-diffusion-3-medium';
     $payload = [
         "prompt" => $input['prompt'],
         "cfg_scale" => $input['cfg_scale'] ?? 5,
@@ -124,18 +128,27 @@ if ($model === 'flux.1-schnell') {
         "steps" => $input['steps'] ?? 28,
         "negative_prompt" => $input['negative_prompt'] ?? ""
     ];
-}
+} else if ($model === 'flux.2-klein-4b') {
+    $nvidia_url = 'https://ai.api.nvidia.com/v1/genai/black-forest-labs/flux.2-klein-4b';
+    $payload = [
+        "prompt" => $input['prompt'],
+        "width" => $input['width'] ?? 1024,
+        "height" => $input['height'] ?? 1024,
+        "seed" => $input['seed'] ?? 0,
+        "steps" => $input['steps'] ?? 4
+    ];
+} 
 
 $headers = [
     "Authorization: Bearer " . $API_KEY,
     "Content-Type: application/json",
     "Accept: application/json",
-    "User-Agent: "
+    "User-Agent: NVIDIA-AI-Proxy/1.0"
 ];
 
 $ch = curl_init();
 curl_setopt_array($ch, [
-    CURLOPT_URL => $url,
+    CURLOPT_URL => $nvidia_url,
     CURLOPT_RETURNTRANSFER => true,
     CURLOPT_POST => true,
     CURLOPT_POSTFIELDS => json_encode($payload),
@@ -183,7 +196,8 @@ if (json_last_error() !== JSON_ERROR_NONE) {
     ]);
 }
 
-if ($model === 'flux.1-schnell') {
+// ИСПРАВЛЕННАЯ СТРОКА: Добавлена модель flux.2-klein-4b
+if ($model === 'flux.1-schnell' || $model === 'flux.2-klein-4b') {
     if (!isset($response_data['artifacts']) || !is_array($response_data['artifacts']) || empty($response_data['artifacts'])) {
         sendError('Unexpected response format from API: missing artifacts array', 500, [
             'response_structure' => $response_data,

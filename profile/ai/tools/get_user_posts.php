@@ -1,8 +1,11 @@
 <?php
 /*  tools/get_user_posts.php
+    Возвращает 5 последних постов пользователя в JSON.
+    GET-параметр u = ник (опционально)
 */
-session_start();
 require_once __DIR__ . '/../../../template/auth.php';
+require_once __DIR__ . '/../../../template/nsfw.php';
+auth_start_session();
 auth_sync_session_from_token();
 require_once '../../../template/conn.php';
 
@@ -22,7 +25,7 @@ if (!$conn) {
 }
 
 $login = $_SESSION['user'];
-$stmt  = $conn->prepare("SELECT u.id, sg.lvl FROM users u JOIN site_group sg ON u.permissions = sg.name WHERE u.login = ?");
+$stmt  = $conn->prepare("SELECT u.id, u.NSFW, u.AUTO_NSFW, u.CONFIRM_NSFW, sg.lvl FROM users u JOIN site_group sg ON u.permissions = sg.name WHERE u.login = ?");
 $stmt->bind_param('s', $login);
 $stmt->execute();
 $res   = $stmt->get_result();
@@ -56,8 +59,14 @@ if ($targetName === $login) {
 }
 
 $posts = [];
-$stmt  = $conn->prepare("SELECT title, post, data FROM post WHERE id_user = ? ORDER BY data DESC LIMIT 5");
-$stmt->bind_param('i', $target_id);
+$canViewNsfw = nsfw_user_has_access($caller);
+if ($canViewNsfw) {
+    $stmt  = $conn->prepare("SELECT title, post, data FROM post WHERE id_user = ? ORDER BY data DESC LIMIT 5");
+    $stmt->bind_param('i', $target_id);
+} else {
+    $stmt  = $conn->prepare("SELECT title, post, data FROM post WHERE id_user = ? AND NSFW = 0 ORDER BY data DESC LIMIT 5");
+    $stmt->bind_param('i', $target_id);
+}
 $stmt->execute();
 $res   = $stmt->get_result();
 
@@ -72,4 +81,3 @@ while ($row = $res->fetch_assoc()) {
 
 echo json_encode($posts ?: ['Нет постов']);
 session_write_close();
-

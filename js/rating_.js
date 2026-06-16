@@ -1,10 +1,15 @@
 function ratePost(postId, vote) {
     const formData = new FormData();
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
     formData.append('post_id', postId);
     formData.append('vote', vote);
+    if (csrfToken) {
+        formData.append('csrf_token', csrfToken);
+    }
     
     fetch('./rate_post', {
         method: 'POST',
+        headers: csrfToken ? { 'X-CSRF-Token': csrfToken } : {},
         body: formData
     })
     .then(response => response.json())

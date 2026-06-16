@@ -31,9 +31,9 @@
     @media (max-width: 768px) {.start-title {font-size: 42px;}.start-subtitle {font-size: 16px;}.start-container {padding: 25px;}.start-button {font-size: 22px;padding: 15px;}}
     #gameCanvas {border: 3px solid #4a148c;box-shadow: 0 0 20px rgba(138, 43, 226, 0.5);image-rendering: pixelated;image-rendering: crisp-edges;}
     #ui {position: absolute;top: 10px;left: 10px;background: rgba(0, 0, 0, 0.7);padding: 15px;border-radius: 8px;border: 2px solid #8a2be2;}
-    #controls {position: absolute;bottom: 20px;right: 20px;display: none;}
+    #controls {position: absolute;bottom: 20px;right: -18px;display: none;}
     #attackControls {position: absolute;bottom: 20px;left: 20px;display: none;gap: 10px;}
-    .control-btn, .attack-btn {width: 60px;height: 60px;background: rgba(138, 43, 226, 0.6);border: 2px solid #8a2be2;border-radius: 50%;color: white;font-size: 18px;display: flex;align-items: center;justify-content: center;cursor: pointer;user-select: none;touch-action: none;flex-direction: column;font-weight: bold;}
+    .control-btn, .attack-btn {width: 50px;height: 50px;background: rgba(138, 43, 226, 0.6);border: 2px solid #8a2be2;border-radius: 50%;color: white;font-size: 18px;display: flex;align-items: center;justify-content: center;cursor: pointer;user-select: none;touch-action: none;flex-direction: column;font-weight: bold;}
     .attack-btn {background: rgba(255, 69, 0, 0.6);border-color: #ff4500;}
     .control-btn:active, .attack-btn:active {background: rgba(138, 43, 226, 0.9);}
     .attack-btn:active {background: rgba(255, 69, 0, 0.9);}
@@ -42,8 +42,40 @@
     #attackButtons {display: flex;gap: 10px;}
     .hearts {color: #ff0066;font-size: 20px;margin: 5px 0;}
     .amethyst {color: #a855f7;font-size: 18px;margin: 5px 0;}
+    .powerup-indicator {font-size: 14px;margin: 3px 0;opacity: 0.9;}
+    .powerup-indicator.inactive {opacity: 0.3;}
     #actionPrompt {position: absolute;background: rgba(138, 43, 226, 0.9);color: #fff;padding: 10px 20px;border-radius: 10px;border: 2px solid #d946ef;font-size: 18px;font-weight: bold;pointer-events: none;display: none;box-shadow: 0 0 20px rgba(138, 43, 226, 0.8);}
-    @media (max-width: 768px) {#controls {display: block;}#attackControls {display: block;}}
+    #shopBtn {position: absolute;top: 10px;right: 10px;width: 50px;height: 50px;background: linear-gradient(135deg, #8a2be2, #d946ef);border: 2px solid #d946ef;border-radius: 12px;color: #fff;font-size: 24px;cursor: pointer;display: none;align-items: center;justify-content: center;box-shadow: 0 0 15px rgba(138, 43, 226, 0.6);transition: all 0.3s;z-index: 100;}
+    #shopBtn:hover {transform: scale(1.1);box-shadow: 0 0 25px rgba(138, 43, 226, 0.9);}
+    #shopOverlay {position: fixed;top: 0;left: 0;width: 100%;height: 100%;background: rgba(0, 0, 0, 0.8);display: none;justify-content: center;align-items: center;z-index: 2000;}
+    .shop-panel {max-width: 450px;width: 90%;background: rgba(20, 10, 40, 0.97);border: 3px solid #8a2be2;border-radius: 20px;padding: 30px;box-shadow: 0 0 60px rgba(138, 43, 226, 0.7);}
+    .shop-title {font-size: 32px;color: #d946ef;text-shadow: 0 0 15px rgba(217, 70, 239, 0.7);text-align: center;margin-bottom: 8px;}
+    .shop-balance {text-align: center;color: #a855f7;font-size: 18px;margin-bottom: 20px;}
+    .shop-item {background: rgba(138, 43, 226, 0.15);border: 2px solid rgba(138, 43, 226, 0.4);border-radius: 12px;padding: 15px;margin-bottom: 12px;display: flex;align-items: center;justify-content: space-between;transition: all 0.3s;}
+    .shop-item:hover {border-color: #d946ef;box-shadow: 0 0 15px rgba(138, 43, 226, 0.3);}
+    .shop-item-info {flex: 1;}
+    .shop-item-name {color: #d946ef;font-size: 16px;font-weight: bold;margin-bottom: 4px;}
+    .shop-item-desc {color: #a855f7;font-size: 13px;}
+    .shop-item-count {color: #fff;font-size: 12px;margin-top: 2px;opacity: 0.7;}
+    .shop-buy-btn {padding: 10px 18px;background: linear-gradient(135deg, #8a2be2, #d946ef);border: none;border-radius: 10px;color: #fff;font-size: 14px;font-weight: bold;cursor: pointer;transition: all 0.2s;white-space: nowrap;}
+    .shop-buy-btn:hover:not(:disabled) {transform: scale(1.05);box-shadow: 0 0 15px rgba(138, 43, 226, 0.7);}
+    .shop-buy-btn:disabled {opacity: 0.4;cursor: not-allowed;}
+    .shop-close-btn {width: 100%;padding: 12px;margin-top: 8px;background: rgba(138, 43, 226, 0.3);border: 2px solid #8a2be2;border-radius: 12px;color: #fff;font-size: 16px;cursor: pointer;transition: all 0.3s;}
+    .shop-close-btn:hover {background: rgba(138, 43, 226, 0.5);}
+    .shop-mobile-btn {display: none;}
+    @media (max-width: 768px) {#controls {display: block;}#attackControls {display: block;}.shop-mobile-btn {display: flex;}}
+    #altarOverlay {position: fixed;top: 0;left: 0;width: 100%;height: 100%;background: rgba(0, 0, 0, 0.8);display: none;justify-content: center;align-items: center;z-index: 3000;}
+    .altar-panel {max-width: 400px;width: 90%;background: rgba(20, 10, 40, 0.97);border: 3px solid #8b00ff;border-radius: 20px;padding: 30px;box-shadow: 0 0 60px rgba(139, 0, 255, 0.7);text-align: center;}
+    .altar-title {font-size: 28px;color: #ff0000;text-shadow: 0 0 15px rgba(255, 0, 0, 0.7);margin-bottom: 15px;}
+    .altar-text {color: #d946ef;font-size: 16px;margin-bottom: 25px;}
+    .altar-buttons {display: flex;gap: 15px;justify-content: center;}
+    .altar-btn {padding: 12px 30px;font-size: 18px;font-weight: bold;border: none;border-radius: 12px;cursor: pointer;transition: all 0.3s;}
+    .altar-btn-yes {background: linear-gradient(135deg, #8b00ff, #ff0000);color: white;}
+    .altar-btn-no {background: rgba(139, 0, 255, 0.3);color: #d946ef;border: 2px solid #8b00ff;}
+    #statsOverlay {position: fixed;top: 0;left: 0;width: 100%;height: 100%;background: rgba(0, 0, 0, 0.9);display: none;justify-content: center;align-items: center;z-index: 4000;}
+    .stats-panel {max-width: 450px;width: 90%;background: rgba(20, 10, 40, 0.97);border: 3px solid #d946ef;border-radius: 20px;padding: 30px;box-shadow: 0 0 60px rgba(217, 70, 239, 0.7);text-align: center;}
+    .stats-title {font-size: 32px;color: #d946ef;text-shadow: 0 0 15px rgba(217, 70, 239, 0.7);margin-bottom: 20px;}
+    .stats-line {color: #fff;font-size: 18px;margin: 10px 0;}
 </style>
 </head>
 <body>
@@ -72,8 +104,16 @@
                 <span class="info-value">Активация</span>
             </div>
             <div class="info-line">
+                <span class="info-label">Магазин (B):</span>
+                <span class="info-value">Покупка улучшений</span>
+            </div>
+            <div class="info-line">
                 <span class="info-label">Восст. HP:</span>
                 <span class="info-value">13 &#128142;</span>
+            </div>
+            <div class="info-line">
+                <span class="info-label">Звезда смерти (R):</span>
+                <span class="info-value">4 &#128142; (нужна сила)</span>
             </div>
         </div>
 
@@ -84,8 +124,58 @@
 <canvas id="gameCanvas" style="display: none;"></canvas>
 
 <div id="ui" style="display: none;">
-    <div class="hearts">&#9829;<span id="lives">3</span>/7</div>
+    <div class="hearts">&#9829;<span id="lives">3</span>/<span id="maxLivesDisplay">7</span></div>
     <div class="amethyst">&#128142;<span id="amethysts">3</span></div>
+    <div class="powerup-indicator inactive" id="powerupKing">&#x1F451; Король</div>
+    <div class="powerup-indicator inactive" id="powerupArcher">&#x1F3F9; Лучник</div>
+    <div class="powerup-indicator inactive" id="powerupAstrologer">&#x2728; Астролог</div>
+</div>
+
+<button id="shopBtn" onclick="openShop()" style="display: none;" title="Магазин (B)">🛒</button>
+
+<div id="shopOverlay">
+    <div class="shop-panel">
+        <div class="shop-title">🛒 Магазин</div>
+        <div class="shop-balance">Баланс: 💎<span id="shopBalance">0</span></div>
+
+        <div class="shop-item" id="shopItemHoming">
+            <div class="shop-item-info">
+                <div class="shop-item-name">🎯 +1 Самонаводка</div>
+                <div class="shop-item-desc">Добавляет 1 снаряд к атаке E</div>
+                <div class="shop-item-count">Куплено: <span id="homingBought">0</span>/3</div>
+            </div>
+            <button class="shop-buy-btn" id="buyHomingBtn" onclick="buyHomingUpgrade()">💎 15</button>
+        </div>
+
+        <div class="shop-item" id="shopItemMaxHp">
+            <div class="shop-item-info">
+                <div class="shop-item-name">❤️ +1 Макс. HP</div>
+                <div class="shop-item-desc">Увеличивает максимальное здоровье</div>
+                <div class="shop-item-count">Куплено: <span id="maxHpBought">0</span>/5</div>
+            </div>
+            <button class="shop-buy-btn" id="buyMaxHpBtn" onclick="buyMaxHpUpgrade()">💎 10</button>
+        </div>
+
+        <button class="shop-close-btn" onclick="closeShop()">Закрыть (B / Esc)</button>
+    </div>
+</div>
+
+<div id="altarOverlay">
+    <div class="altar-panel">
+        <div class="altar-title">Алтарь Бездны</div>
+        <div class="altar-text">Покинуть мир бездны?</div>
+        <div class="altar-buttons">
+            <button class="altar-btn altar-btn-yes" onclick="altarYes()">Да</button>
+            <button class="altar-btn altar-btn-no" onclick="altarNo()">Нет</button>
+        </div>
+    </div>
+</div>
+<div id="statsOverlay">
+    <div class="stats-panel">
+        <div class="stats-title">Путешествие завершено</div>
+        <div class="stats-line">Врагов убито: <span id="statEnemiesKilled">0</span></div>
+        <div class="stats-line">Кристаллов собрано: <span id="statTotalCrystals">0</span></div>
+    </div>
 </div>
 
 <div id="actionPrompt">Нажми F</div>
@@ -112,12 +202,15 @@
         <div class="attack-btn" data-attack="e">
             E<br><small>3&#128142;</small>
         </div>
+        <div class="attack-btn" data-attack="r">
+            R<br><small>4&#128142;</small>
+        </div>
         <div class="attack-btn" data-attack="f">
             F<br><small>Акт.</small>
         </div>
     </div>
 </div>
-
+<script src="./js/jquery-3.7.1.min.js"></script>
 <script>
     const TILE_SIZE = 32;
     const VIEW_WIDTH = 25;
@@ -145,7 +238,9 @@
         SHELTER_STICK: 13,
         SHRINE: 14,
         MAGIC_TILE: 15,
-        MAZE_WALL: 16
+        MAZE_WALL: 16,
+        ALTAR_WALL: 17,
+        ALTAR_BLOCK: 18
     };
 
     const TILE_LAYERS = {
@@ -165,7 +260,9 @@
         [TILES.SHELTER_ROOF]: 3,
         [TILES.SHELTER_STICK]: 3,
         [TILES.MAGIC_TILE]: 3,
-        [TILES.MAZE_WALL]: 3
+        [TILES.MAZE_WALL]: 3,
+        [TILES.ALTAR_WALL]: 3,
+        [TILES.ALTAR_BLOCK]: 3
     };
 
     const game = {
@@ -182,7 +279,7 @@
             spawnY: 0,
             lives: 3,
             maxLives: 7,
-            amethysts: 3
+            amethysts: 9
         },
         camera: {
             x: 0,
@@ -198,12 +295,32 @@
         archers: [],
         mages: [],
         archerChiefs: [],
+        astrologers: [],
         projectiles: [],
         playerProjectiles: [],
         droppedItems: [],
         shrines: [],
+        altars: [],
         magicTiles: [],
-        
+
+        playerPowerups: {
+            king: false,
+            archer: false,
+            astrologer: false
+        },
+
+        stats: {
+            enemiesKilled: 0,
+            totalCrystals: 0
+        },
+
+        shop: {
+            homingPurchases: 0,
+            maxHpPurchases: 0,
+            isOpen: false,
+            homingCost: 15,
+            maxHpCost: 10
+        },
         generatedChunks: new Set(),
         lastFrameTime: Date.now(),
         nearestInteractable: null
@@ -226,7 +343,7 @@
             this.vy = dirY * 0.2;
             this.isHoming = isHoming;
             this.active = true;
-            this.lifetime = 5000;
+            this.lifetime = 3000;
             this.speed = 0.2;
         }
 
@@ -235,10 +352,10 @@
                 let closestEnemy = null;
                 let minDist = Infinity;
 
-                for (const enemy of [...game.enemies, ...game.kings, ...game.archers, ...game.mages, ...game.archerChiefs]) {
+                for (const enemy of [...game.enemies, ...game.kings, ...game.archers, ...game.mages, ...game.archerChiefs, ...game.astrologers]) {
                     if (!enemy.active) continue;
                     const dist = Math.sqrt(
-                        Math.pow(enemy.x - this.x, 2) + 
+                        Math.pow(enemy.x - this.x, 2) +
                         Math.pow(enemy.y - this.y, 2)
                     );
                     if (dist < minDist) {
@@ -269,30 +386,73 @@
                 this.active = false;
             }
 
-            for (const enemy of [...game.enemies, ...game.kings, ...game.archers, ...game.mages, ...game.archerChiefs]) {
+            for (const enemy of [...game.enemies, ...game.kings, ...game.archers, ...game.mages, ...game.archerChiefs, ...game.astrologers]) {
                 if (!enemy.active) continue;
                 const dist = Math.sqrt(
-                    Math.pow(enemy.x - this.x, 2) + 
+                    Math.pow(enemy.x - this.x, 2) +
                     Math.pow(enemy.y - this.y, 2)
                 );
                 if (dist < 0.5) {
-                    this.active = false;
                     if (enemy.takeDamage) {
                         enemy.takeDamage();
                     } else {
                         if (enemy.onDeath) enemy.onDeath();
                         enemy.active = false;
                     }
+
+                    //Повер ап короля: 50% AoE дамага в радиусе 2 дайла.
+                    if (!this.isHoming && game.playerPowerups.king && rng.next() < 0.5) {
+                        for (const aoeEnemy of [...game.enemies, ...game.kings, ...game.archers, ...game.mages, ...game.archerChiefs, ...game.astrologers]) {
+                            if (!aoeEnemy.active || aoeEnemy === enemy) continue;
+                            const aoeDist = Math.sqrt(Math.pow(aoeEnemy.x - this.x, 2) + Math.pow(aoeEnemy.y - this.y, 2));
+                            if (aoeDist <= 2) {
+                                if (aoeEnemy.takeDamage) {
+                                    aoeEnemy.takeDamage();
+                                } else {
+                                    if (aoeEnemy.onDeath) aoeEnemy.onDeath();
+                                    aoeEnemy.active = false;
+                                }
+                            }
+                        }
+                    }
+
+                    //Повер ап лучника: 15% не просрать самонаводку.
+                    if (!(this.isHoming && game.playerPowerups.archer && rng.next() < 0.25)) {
+                        this.active = false;
+                    }
                     break;
                 }
             }
 
             const tile = getTile(Math.floor(this.x), Math.floor(this.y));
-            if ([TILES.TREE, TILES.HOUSE, TILES.CASTLE_WALL, TILES.CASTLE_TOWER, 
-                 TILES.SHELTER_ROOF, TILES.SHELTER_STICK, TILES.MAZE_WALL].includes(tile)) {
+            if ([TILES.TREE, TILES.HOUSE, TILES.CASTLE_WALL, TILES.CASTLE_TOWER,
+                 TILES.SHELTER_ROOF, TILES.SHELTER_STICK, TILES.MAZE_WALL, TILES.ALTAR_WALL, TILES.ALTAR_BLOCK].includes(tile)) {
                 this.active = false;
             }
         }
+    }
+
+    function findBestMove(fromX, fromY, toX, toY) {
+        const directions = [{dx:0,dy:-1},{dx:0,dy:1},{dx:-1,dy:0},{dx:1,dy:0}];
+        let bestDir = null;
+        let bestDist = Infinity;
+
+        for (const dir of directions) {
+            const newX = fromX + dir.dx;
+            const newY = fromY + dir.dy;
+            const tile = getTile(newX, newY);
+
+            if (tile === TILES.VOID) continue;
+            if (!canMove(newX, newY)) continue;
+
+            const dist = Math.abs(toX - newX) + Math.abs(toY - newY);
+            if (dist < bestDist) {
+                bestDist = dist;
+                bestDir = dir;
+            }
+        }
+
+        return bestDir;
     }
 
     class Enemy {
@@ -312,6 +472,7 @@
         }
 
         onDeath() {
+            game.stats.enemiesKilled++;
             if (rng.next() < 0.3) {
                 const roll = rng.next();
                 let type;
@@ -340,8 +501,8 @@
                 const checkY = Math.floor(this.y + dy * t);
                 const tile = getTile(checkX, checkY);
 
-                if ([TILES.TREE, TILES.HOUSE, TILES.CASTLE_WALL, TILES.CASTLE_TOWER, 
-                     TILES.SHELTER_STICK, TILES.MAZE_WALL].includes(tile)) {
+                if ([TILES.TREE, TILES.HOUSE, TILES.CASTLE_WALL, TILES.CASTLE_TOWER,
+                     TILES.SHELTER_STICK, TILES.MAZE_WALL, TILES.ALTAR_WALL, TILES.ALTAR_BLOCK].includes(tile)) {
                     return false;
                 }
             }
@@ -359,25 +520,10 @@
                 this.moveCooldown -= deltaTime * 1000;
 
                 if (this.moveCooldown <= 0) {
-                    const dx = game.player.x - this.x;
-                    const dy = game.player.y - this.y;
-
-                    let moveX = 0;
-                    let moveY = 0;
-
-                    if (Math.abs(dx) > Math.abs(dy)) {
-                        moveX = dx > 0 ? 1 : -1;
-                    } else {
-                        moveY = dy > 0 ? 1 : -1;
-                    }
-
-                    const newX = this.x + moveX;
-                    const newY = this.y + moveY;
-
-                    const targetTile = getTile(newX, newY);
-                    if (targetTile === TILES.VOID) {
-                        this.active = false;
-                    } else if (canMove(newX, newY)) {
+                    const bestDir = findBestMove(this.x, this.y, game.player.x, game.player.y);
+                    if (bestDir) {
+                        const newX = this.x + bestDir.dx;
+                        const newY = this.y + bestDir.dy;
                         this.targetX = newX;
                         this.targetY = newY;
                         this.isMoving = true;
@@ -394,10 +540,6 @@
                     this.x = this.targetX;
                     this.y = this.targetY;
                     this.isMoving = false;
-
-                    if (getTile(this.x, this.y) === TILES.VOID) {
-                        this.active = false;
-                    }
                 }
             }
 
@@ -468,7 +610,12 @@
         }
 
         onDeath() {
+            game.stats.enemiesKilled++;
             game.droppedItems.push(new DroppedItem(this.x, this.y, TILES.HUGE_AMETHYST));
+            //25% шанс на дроп баффа Короля.
+            if (rng.next() < 0.25) {
+                game.droppedItems.push(new DroppedItem(this.x, this.y + 0.5, 'POWERUP_KING'));
+            }
         }
 
         canSeePlayer() {
@@ -485,25 +632,10 @@
                 this.moveCooldown -= deltaTime * 1000;
 
                 if (this.moveCooldown <= 0) {
-                    const dx = game.player.x - this.x;
-                    const dy = game.player.y - this.y;
-
-                    let moveX = 0;
-                    let moveY = 0;
-
-                    if (Math.abs(dx) > Math.abs(dy)) {
-                        moveX = dx > 0 ? 1 : -1;
-                    } else {
-                        moveY = dy > 0 ? 1 : -1;
-                    }
-
-                    const newX = this.x + moveX;
-                    const newY = this.y + moveY;
-
-                    const targetTile = getTile(newX, newY);
-                    if (targetTile === TILES.VOID) {
-                        this.active = false;
-                    } else if (canMove(newX, newY)) {
+                    const bestDir = findBestMove(this.x, this.y, game.player.x, game.player.y);
+                    if (bestDir) {
+                        const newX = this.x + bestDir.dx;
+                        const newY = this.y + bestDir.dy;
                         this.targetX = newX;
                         this.targetY = newY;
                         this.isMoving = true;
@@ -519,10 +651,6 @@
                     this.x = this.targetX;
                     this.y = this.targetY;
                     this.isMoving = false;
-
-                    if (getTile(this.x, this.y) === TILES.VOID) {
-                        this.active = false;
-                    }
                 }
             }
 
@@ -558,6 +686,7 @@
         }
 
         onDeath() {
+            game.stats.enemiesKilled++;
             if (rng.next() < 0.3) {
                 const roll = rng.next();
                 let type;
@@ -623,6 +752,7 @@
         }
 
         onDeath() {
+            game.stats.enemiesKilled++;
             if (rng.next() < 0.75) {
                 const type = rng.next() < 0.5 ? TILES.BIG_AMETHYST : TILES.HUGE_AMETHYST;
                 game.droppedItems.push(new DroppedItem(this.x, this.y, type));
@@ -651,25 +781,10 @@
                 this.moveCooldown -= deltaTime * 1000;
 
                 if (this.moveCooldown <= 0) {
-                    const dx = game.player.x - this.x;
-                    const dy = game.player.y - this.y;
-
-                    let moveX = 0;
-                    let moveY = 0;
-
-                    if (Math.abs(dx) > Math.abs(dy)) {
-                        moveX = dx > 0 ? 1 : -1;
-                    } else {
-                        moveY = dy > 0 ? 1 : -1;
-                    }
-
-                    const newX = this.x + moveX;
-                    const newY = this.y + moveY;
-
-                    const targetTile = getTile(newX, newY);
-                    if (targetTile === TILES.VOID) {
-                        this.active = false;
-                    } else if (canMove(newX, newY)) {
+                    const bestDir = findBestMove(this.x, this.y, game.player.x, game.player.y);
+                    if (bestDir) {
+                        const newX = this.x + bestDir.dx;
+                        const newY = this.y + bestDir.dy;
                         this.targetX = newX;
                         this.targetY = newY;
                         this.isMoving = true;
@@ -686,10 +801,6 @@
                     this.x = this.targetX;
                     this.y = this.targetY;
                     this.isMoving = false;
-
-                    if (getTile(this.x, this.y) === TILES.VOID) {
-                        this.active = false;
-                    }
                 }
             }
 
@@ -714,8 +825,13 @@
         }
 
         onDeath() {
+            game.stats.enemiesKilled++;
             game.droppedItems.push(new DroppedItem(this.x, this.y, TILES.HUGE_AMETHYST));
             game.droppedItems.push(new DroppedItem(this.x + 0.5, this.y, TILES.BIG_AMETHYST));
+            //25% шанс на дроп баффа Лучника.
+            if (rng.next() < 0.25) {
+                game.droppedItems.push(new DroppedItem(this.x, this.y + 0.5, 'POWERUP_ARCHER'));
+            }
         }
 
         takeDamage() {
@@ -731,7 +847,7 @@
 
             this.spawnCooldown -= deltaTime * 1000;
             if (this.spawnCooldown <= 0) {
-                for (let attempt = 0; attempt < 20; attempt++) {
+                for (let attempt = 0; attempt < 5; attempt++) {
                     const dx = rng.range(-3, 3);
                     const dy = rng.range(-3, 3);
                     const newX = this.x + dx;
@@ -747,6 +863,126 @@
         }
     }
 
+    class Astrologer {
+        constructor(x, y) {
+            this.x = x;
+            this.y = y;
+            this.displayX = x;
+            this.displayY = y;
+            this.targetX = x;
+            this.targetY = y;
+            this.isMoving = false;
+            this.moveProgress = 0;
+            this.active = true;
+            this.hp = 6;
+            this.phase = 'fleeing';
+            this.fleeSteps = 0;
+            this.maxFleeSteps = 5;
+            this.attackCooldown = 0;
+            this.attackDelay = 3500;
+            this.moveCooldown = 0;
+        }
+
+        takeDamage() {
+            this.hp--;
+            if (this.hp <= 0) {
+                this.onDeath();
+                this.active = false;
+            }
+        }
+
+        onDeath() {
+            game.stats.enemiesKilled++;
+
+            game.droppedItems.push(new DroppedItem(this.x, this.y, TILES.HUGE_AMETHYST));
+            game.droppedItems.push(new DroppedItem(this.x + 0.5, this.y, TILES.BIG_AMETHYST));
+            game.droppedItems.push(new DroppedItem(this.x - 0.5, this.y, TILES.BIG_AMETHYST));
+
+            //25% шанс на дроп баффа Астролога.
+            if (rng.next() < 0.25) {
+                game.droppedItems.push(new DroppedItem(this.x, this.y + 0.5, 'POWERUP_ASTROLOGER'));
+            }
+        }
+
+        update(deltaTime) {
+            if (!this.active) return;
+
+            this.displayX += (this.x - this.displayX) * 0.1;
+            this.displayY += (this.y - this.displayY) * 0.1;
+
+            if (this.phase === 'fleeing') {
+                if (!this.isMoving) {
+                    this.moveCooldown -= deltaTime * 1000;
+                    if (this.moveCooldown <= 0) {
+                        const dx = this.x - game.player.x;
+                        const dy = this.y - game.player.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+
+                        let moveX = 0, moveY = 0;
+                        if (dist > 0) {
+                            if (Math.abs(dx) > Math.abs(dy)) {
+                                moveX = dx > 0 ? 1 : -1;
+                            } else {
+                                moveY = dy > 0 ? 1 : -1;
+                            }
+                        }
+
+                        const newX = this.x + moveX;
+                        const newY = this.y + moveY;
+                        const tile = getTile(newX, newY);
+
+                        if (canMove(newX, newY) || tile === TILES.VOID) {
+                            this.targetX = newX;
+                            this.targetY = newY;
+                            this.isMoving = true;
+                            this.moveProgress = 0;
+                        }
+
+                        this.fleeSteps++;
+                        this.moveCooldown = 250;
+
+                        if (this.fleeSteps >= this.maxFleeSteps) {
+                            this.phase = 'attacking';
+                            this.attackCooldown = this.attackDelay;
+                        }
+                    }
+                }
+            } else if (this.phase === 'attacking') {
+                this.attackCooldown -= deltaTime * 1000;
+                if (this.attackCooldown <= 0) {
+                    const dx = game.player.x - this.x;
+                    const dy = game.player.y - this.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist > 0) {
+                        const speed = 0.15;
+                        for (let i = -1; i <= 0; i++) {
+                            const spreadAngle = i * 0.2;
+                            const baseAngle = Math.atan2(dy, dx);
+                            const angle = baseAngle + spreadAngle;
+                            const vx = Math.cos(angle) * speed;
+                            const vy = Math.sin(angle) * speed;
+                            game.projectiles.push(new Projectile(this.x, this.y, vx, vy));
+                        }
+                        game.projectiles.push(new HomingProjectile(this.x, this.y));
+                    }
+
+                    this.phase = 'fleeing';
+                    this.fleeSteps = 0;
+                }
+            }
+
+            if (this.isMoving) {
+                this.moveProgress += deltaTime * 5;
+                if (this.moveProgress >= 1) {
+                    this.x = this.targetX;
+                    this.y = this.targetY;
+                    this.isMoving = false;
+                }
+            }
+        }
+    }
+
     class Projectile {
         constructor(x, y, vx, vy) {
             this.x = x;
@@ -754,7 +990,7 @@
             this.vx = vx;
             this.vy = vy;
             this.active = true;
-            this.lifetime = 5000;
+            this.lifetime = 3000;
         }
 
         update(deltaTime) {
@@ -767,7 +1003,7 @@
             }
 
             const distToPlayer = Math.sqrt(
-                Math.pow(this.x - game.player.displayX, 2) + 
+                Math.pow(this.x - game.player.displayX, 2) +
                 Math.pow(this.y - game.player.displayY, 2)
             );
 
@@ -788,8 +1024,8 @@
             }
 
             const tile = getTile(Math.floor(this.x), Math.floor(this.y));
-            if ([TILES.TREE, TILES.HOUSE, TILES.CASTLE_WALL, TILES.CASTLE_TOWER, 
-                 TILES.SHELTER_ROOF, TILES.MAZE_WALL].includes(tile)) {
+            if ([TILES.TREE, TILES.HOUSE, TILES.CASTLE_WALL, TILES.CASTLE_TOWER,
+                 TILES.SHELTER_ROOF, TILES.MAZE_WALL, TILES.ALTAR_WALL, TILES.ALTAR_BLOCK].includes(tile)) {
                 this.active = false;
             }
         }
@@ -802,7 +1038,7 @@
             this.vx = 0;
             this.vy = -0.1;
             this.active = true;
-            this.lifetime = 8000;
+            this.lifetime = 3000;
             this.speed = 0.1;
         }
 
@@ -827,7 +1063,7 @@
             }
 
             const distToPlayer = Math.sqrt(
-                Math.pow(this.x - game.player.displayX, 2) + 
+                Math.pow(this.x - game.player.displayX, 2) +
                 Math.pow(this.y - game.player.displayY, 2)
             );
 
@@ -848,8 +1084,8 @@
             }
 
             const tile = getTile(Math.floor(this.x), Math.floor(this.y));
-            if ([TILES.TREE, TILES.HOUSE, TILES.CASTLE_WALL, TILES.CASTLE_TOWER, 
-                 TILES.SHELTER_ROOF, TILES.MAZE_WALL].includes(tile)) {
+            if ([TILES.TREE, TILES.HOUSE, TILES.CASTLE_WALL, TILES.CASTLE_TOWER,
+                 TILES.SHELTER_ROOF, TILES.MAZE_WALL, TILES.ALTAR_WALL, TILES.ALTAR_BLOCK].includes(tile)) {
                 this.active = false;
             }
         }
@@ -883,7 +1119,7 @@
 
 
     function generateShrine(centerX, centerY) {
-        if (getTile(centerX, centerY) !== TILES.GROUND || 
+        if (getTile(centerX, centerY) !== TILES.GROUND ||
             getTile(centerX, centerY + 1) !== TILES.GROUND) {
             return false;
         }
@@ -1031,6 +1267,84 @@
         return true;
     }
 
+    function generateAltar(centerX, centerY) {
+        const size = 4;
+
+        for (let dy = -size; dy <= size; dy++) {
+            for (let dx = -size; dx <= size; dx++) {
+                if (getTile(centerX + dx, centerY + dy) !== TILES.GROUND) {
+                    return false;
+                }
+            }
+        }
+
+        for (let dy = -size; dy <= size; dy++) {
+            for (let dx = -size; dx <= size; dx++) {
+                if (Math.abs(dx) === size || Math.abs(dy) === size) {
+                    if ((dx === 0 && Math.abs(dy) === size) || (dy === 0 && Math.abs(dx) === size)) {
+                        continue;
+                    }
+                    setTile(centerX + dx, centerY + dy, TILES.ALTAR_WALL);
+                }
+            }
+        }
+
+        let bigCount = 0, medCount = 0, smallCount = 0;
+
+        for (let attempt = 0; attempt < 30; attempt++) {
+            const dx = rng.range(-3, 3);
+            const dy = rng.range(-3, 3);
+            if (getTile(centerX + dx, centerY + dy) === TILES.GROUND) {
+                setTile(centerX + dx, centerY + dy, TILES.BIG_AMETHYST);
+                bigCount++;
+                break;
+            }
+        }
+
+        for (let attempt = 0; attempt < 30; attempt++) {
+            const dx = rng.range(-3, 3);
+            const dy = rng.range(-3, 3);
+            if (getTile(centerX + dx, centerY + dy) === TILES.GROUND) {
+                setTile(centerX + dx, centerY + dy, TILES.MEDIUM_AMETHYST);
+                medCount++;
+                break;
+            }
+        }
+
+        for (let i = 0; i < 5; i++) {
+            if (rng.next() < 0.5) {
+                for (let attempt = 0; attempt < 20; attempt++) {
+                    const dx = rng.range(-3, 3);
+                    const dy = rng.range(-3, 3);
+                    if (getTile(centerX + dx, centerY + dy) === TILES.GROUND) {
+                        setTile(centerX + dx, centerY + dy, TILES.AMETHYST);
+                        smallCount++;
+                        break;
+                    }
+                }
+            }
+        }
+
+        for (let i = 0; i < 3; i++) {
+            if (rng.next() < 0.2) {
+                for (let attempt = 0; attempt < 20; attempt++) {
+                    const dx = rng.range(-3, 3);
+                    const dy = rng.range(-3, 3);
+                    if (getTile(centerX + dx, centerY + dy) === TILES.GROUND) {
+                        setTile(centerX + dx, centerY + dy, TILES.MEDIUM_AMETHYST);
+                        medCount++;
+                        break;
+                    }
+                }
+            }
+        }
+
+        setTile(centerX, centerY, TILES.ALTAR_BLOCK);
+        game.altars.push({ x: centerX, y: centerY, active: true });
+
+        return true;
+    }
+
     function generateIsland(centerX, centerY, size, isMainIsland = false) {
         const island = {
             tiles: [],
@@ -1051,6 +1365,15 @@
                     const y = centerY + dy;
                     setTile(x, y, TILES.GROUND);
                     island.tiles.push({ x, y });
+                }
+            }
+        }
+		
+		if (size >= 10 && rng.next() < 0.03) {
+            for (let attempt = 0; attempt < 10; attempt++) {
+                const tile = island.tiles[rng.range(0, island.tiles.length - 1)];
+                if (tile && generateAltar(tile.x, tile.y)) {
+                    break;
                 }
             }
         }
@@ -1138,18 +1461,9 @@
             }
         }
 
-        if (size >= 6 && rng.next() < 0.15) {
-            for (let attempt = 0; attempt < 20; attempt++) {
-                const tile = island.tiles[rng.range(0, island.tiles.length - 1)];
-                if (tile && generateShrine(tile.x, tile.y)) {
-                    break;
-                }
-            }
-        }
-
         if (!isMainIsland && size >= 8 && rng.next() < 0.05) {
             const distFromSpawn = Math.sqrt(
-                Math.pow(centerX - game.player.spawnX, 2) + 
+                Math.pow(centerX - game.player.spawnX, 2) +
                 Math.pow(centerY - game.player.spawnY, 2)
             );
 
@@ -1163,7 +1477,7 @@
                             for (let j = 0; j < 20; j++) {
                                 const dx = rng.range(-3, 3);
                                 const dy = rng.range(-3, 3);
-                                if (getTile(tile.x + dx, tile.y + dy) === TILES.GROUND && 
+                                if (getTile(tile.x + dx, tile.y + dy) === TILES.GROUND &&
                                     canMove(tile.x + dx, tile.y + dy)) {
                                     game.enemies.push(new Enemy(tile.x + dx, tile.y + dy));
                                     break;
@@ -1178,7 +1492,7 @@
 
         if (!isMainIsland && size >= 8 && rng.next() < 0.04) {
             const distFromSpawn = Math.sqrt(
-                Math.pow(centerX - game.player.spawnX, 2) + 
+                Math.pow(centerX - game.player.spawnX, 2) +
                 Math.pow(centerY - game.player.spawnY, 2)
             );
 
@@ -1192,7 +1506,7 @@
                             for (let j = 0; j < 20; j++) {
                                 const dx = rng.range(-2, 2);
                                 const dy = rng.range(-2, 2);
-                                if (getTile(tile.x + dx, tile.y + dy) === TILES.GROUND && 
+                                if (getTile(tile.x + dx, tile.y + dy) === TILES.GROUND &&
                                     canMove(tile.x + dx, tile.y + dy)) {
                                     game.archers.push(new Archer(tile.x + dx, tile.y + dy));
                                     break;
@@ -1207,7 +1521,7 @@
 
         if (!isMainIsland && size < 6 && rng.next() < 0.3) {
             const distFromSpawn = Math.sqrt(
-                Math.pow(centerX - game.player.spawnX, 2) + 
+                Math.pow(centerX - game.player.spawnX, 2) +
                 Math.pow(centerY - game.player.spawnY, 2)
             );
 
@@ -1222,9 +1536,25 @@
             }
         }
 
+        if (!isMainIsland && size >= 8 && rng.next() < 0.05) {
+            const distFromSpawn = Math.sqrt(
+                Math.pow(centerX - game.player.spawnX, 2) +
+                Math.pow(centerY - game.player.spawnY, 2)
+            );
+            if (distFromSpawn > 25) {
+                for (let attempt = 0; attempt < 30; attempt++) {
+                    const tile = island.tiles[rng.range(0, island.tiles.length - 1)];
+                    if (tile && getTile(tile.x, tile.y) === TILES.GROUND) {
+                        game.astrologers.push(new Astrologer(tile.x, tile.y));
+                        break;
+                    }
+                }
+            }
+        }
+
         if (!isMainIsland && rng.next() < 0.45) {
             const distFromSpawn = Math.sqrt(
-                Math.pow(centerX - game.player.spawnX, 2) + 
+                Math.pow(centerX - game.player.spawnX, 2) +
                 Math.pow(centerY - game.player.spawnY, 2)
             );
 
@@ -1363,13 +1693,89 @@
 
     function updateUI() {
         document.getElementById('lives').textContent = game.player.lives;
+        document.getElementById('maxLivesDisplay').textContent = game.player.maxLives;
         document.getElementById('amethysts').textContent = game.player.amethysts;
+
+        const kingEl = document.getElementById('powerupKing');
+        const archerEl = document.getElementById('powerupArcher');
+        const astrologerEl = document.getElementById('powerupAstrologer');
+
+        if (kingEl) {
+            kingEl.className = 'powerup-indicator' + (game.playerPowerups.king ? '' : ' inactive');
+        }
+        if (archerEl) {
+            archerEl.className = 'powerup-indicator' + (game.playerPowerups.archer ? '' : ' inactive');
+        }
+        if (astrologerEl) {
+            astrologerEl.className = 'powerup-indicator' + (game.playerPowerups.astrologer ? '' : ' inactive');
+        }
+    }
+
+    function updateShopUI() {
+        document.getElementById('shopBalance').textContent = game.player.amethysts;
+        document.getElementById('homingBought').textContent = game.shop.homingPurchases;
+        document.getElementById('maxHpBought').textContent = game.shop.maxHpPurchases;
+
+        const buyHomingBtn = document.getElementById('buyHomingBtn');
+        const buyMaxHpBtn = document.getElementById('buyMaxHpBtn');
+
+        if (game.shop.homingPurchases >= 3) {
+            buyHomingBtn.disabled = true;
+            buyHomingBtn.textContent = 'МАКС';
+        } else {
+            buyHomingBtn.disabled = game.player.amethysts < game.shop.homingCost;
+            buyHomingBtn.textContent = '💎 ' + game.shop.homingCost;
+        }
+
+        if (game.shop.maxHpPurchases >= 5) {
+            buyMaxHpBtn.disabled = true;
+            buyMaxHpBtn.textContent = 'МАКС';
+        } else {
+            buyMaxHpBtn.disabled = game.player.amethysts < game.shop.maxHpCost;
+            buyMaxHpBtn.textContent = '💎 ' + game.shop.maxHpCost;
+        }
+    }
+
+    function openShop() {
+        game.shop.isOpen = true;
+        document.getElementById('shopOverlay').style.display = 'flex';
+        updateShopUI();
+    }
+
+    function closeShop() {
+        game.shop.isOpen = false;
+        document.getElementById('shopOverlay').style.display = 'none';
+    }
+
+    function buyHomingUpgrade() {
+        if (game.shop.homingPurchases >= 3) return;
+        if (game.player.amethysts < game.shop.homingCost) return;
+
+        game.player.amethysts -= game.shop.homingCost;
+        game.shop.homingPurchases++;
+        updateUI();
+        updateShopUI();
+    }
+
+    function buyMaxHpUpgrade() {
+        if (game.shop.maxHpPurchases >= 5) return;
+        if (game.player.amethysts < game.shop.maxHpCost) return;
+
+        game.player.amethysts -= game.shop.maxHpCost;
+        game.shop.maxHpPurchases++;
+        game.player.maxLives++;
+        game.player.lives++;
+        if (game.player.lives > game.player.maxLives) {
+            game.player.lives = game.player.maxLives;
+        }
+        updateUI();
+        updateShopUI();
     }
 
     function canMove(x, y) {
         const tile = getTile(x, y);
-        return ![TILES.TREE, TILES.HOUSE, TILES.CASTLE_WALL, TILES.CASTLE_TOWER, 
-                 TILES.SHELTER_STICK, TILES.MAZE_WALL].includes(tile);
+        return ![TILES.TREE, TILES.HOUSE, TILES.CASTLE_WALL, TILES.CASTLE_TOWER,
+                 TILES.SHELTER_STICK, TILES.MAZE_WALL, TILES.ALTAR_WALL, TILES.ALTAR_BLOCK].includes(tile);
     }
 
     function startPlayerMove(dx, dy) {
@@ -1393,41 +1799,71 @@
         updateUI();
 
         game.playerProjectiles.push(new PlayerProjectile(
-            game.player.x, 
-            game.player.y, 
-            0, 
-            -1, 
+            game.player.x,
+            game.player.y,
+            0,
+            -1,
             false
         ));
     }
 
     function playerAttackHoming() {
-        if (game.player.amethysts < 3) return;
+        const baseCost = 3;
+        if (game.player.amethysts < baseCost) return;
 
-        game.player.amethysts -= 3;
+        game.player.amethysts -= baseCost;
         updateUI();
 
-        game.playerProjectiles.push(new PlayerProjectile(
-            game.player.x, 
-            game.player.y, 
-            0, 
-            -1, 
-            true
-        ));
+        const extraProjectiles = game.shop.homingPurchases;
+        const totalProjectiles = 1 + extraProjectiles;
+        const angleStep = Math.PI / 6;
+
+        for (let i = 0; i < totalProjectiles; i++) {
+            let angle = -Math.PI / 2;
+            if (totalProjectiles > 1) {
+                angle = -Math.PI / 2 + (i - (totalProjectiles - 1) / 2) * angleStep;
+            }
+            const dirX = Math.cos(angle);
+            const dirY = Math.sin(angle);
+            game.playerProjectiles.push(new PlayerProjectile(
+                game.player.x,
+                game.player.y,
+                dirX,
+                dirY,
+                true
+            ));
+        }
+    }
+
+    function playerAttackDeathStar() {
+        if (game.player.amethysts < 4) return;
+        if (!game.playerPowerups.astrologer) return;
+
+        game.player.amethysts -= 4;
+        updateUI();
+
+        const directions = [
+            {dx: 0, dy: -1}, {dx: 1, dy: -1}, {dx: 1, dy: 0}, {dx: 1, dy: 1},
+            {dx: 0, dy: 1}, {dx: -1, dy: 1}, {dx: -1, dy: 0}, {dx: -1, dy: -1}
+        ];
+
+        for (const dir of directions) {
+            const len = Math.sqrt(dir.dx * dir.dx + dir.dy * dir.dy);
+            game.playerProjectiles.push(new PlayerProjectile(
+                game.player.x,
+                game.player.y,
+                dir.dx / len,
+                dir.dy / len,
+                false
+            ));
+        }
     }
 
     function playerAction() {
         const interactable = game.nearestInteractable;
         if (!interactable) return;
 
-        if (interactable.type === 'shrine') {
-            if (game.player.amethysts >= 20) {
-                game.player.amethysts -= 20;
-                game.player.spawnX = interactable.x;
-                game.player.spawnY = interactable.y;
-                updateUI();
-            }
-        } else if (interactable.type === 'magicTile') {
+        if (interactable.type === 'magicTile') {
             const magicTile = game.magicTiles.find(t => t.x === interactable.x && t.y === interactable.y);
             if (magicTile && !magicTile.used) {
                 magicTile.used = true;
@@ -1447,7 +1883,14 @@
                 }
                 updateUI();
             }
-        } 
+        } else if (interactable.type === 'altar') {
+            const altar = game.altars.find(a => a.x === interactable.x && a.y === interactable.y);
+            if (altar && altar.active) {
+                if (game.player.lives >= 7) {
+                    showAltarModal(altar);
+                }
+            }
+        }
     }
 
     function completeMove() {
@@ -1482,24 +1925,28 @@
 
         if (tile === TILES.AMETHYST) {
             game.player.amethysts++;
+            game.stats.totalCrystals += 1;
             setTile(game.player.x, game.player.y, TILES.GROUND);
             updateUI();
         }
 
         if (tile === TILES.MEDIUM_AMETHYST) {
             game.player.amethysts += 3;
+            game.stats.totalCrystals += 3;
             setTile(game.player.x, game.player.y, TILES.GROUND);
             updateUI();
         }
 
         if (tile === TILES.BIG_AMETHYST) {
             game.player.amethysts += 5;
+            game.stats.totalCrystals += 5;
             setTile(game.player.x, game.player.y, TILES.GROUND);
             updateUI();
         }
 
         if (tile === TILES.HUGE_AMETHYST) {
             game.player.amethysts += 10;
+            game.stats.totalCrystals += 10;
             setTile(game.player.x, game.player.y, TILES.GROUND);
             updateUI();
         }
@@ -1509,19 +1956,43 @@
             if (!item.active) continue;
 
             const dist = Math.sqrt(
-                Math.pow(item.x - game.player.x, 2) + 
+                Math.pow(item.x - game.player.x, 2) +
                 Math.pow(item.y - game.player.y, 2)
             );
 
-            if (dist < 0.5) {
+            if (dist < 0.65) {
+                if (item.type === 'POWERUP_KING') {
+                    game.playerPowerups.king = true;
+                    item.active = false;
+                    game.droppedItems.splice(i, 1);
+                    updateUI();
+                    continue;
+                } else if (item.type === 'POWERUP_ARCHER') {
+                    game.playerPowerups.archer = true;
+                    item.active = false;
+                    game.droppedItems.splice(i, 1);
+                    updateUI();
+                    continue;
+                } else if (item.type === 'POWERUP_ASTROLOGER') {
+                    game.playerPowerups.astrologer = true;
+                    item.active = false;
+                    game.droppedItems.splice(i, 1);
+                    updateUI();
+                    continue;
+                }
+
                 if (item.type === TILES.AMETHYST) {
                     game.player.amethysts += 1;
+                    game.stats.totalCrystals += 1;
                 } else if (item.type === TILES.MEDIUM_AMETHYST) {
                     game.player.amethysts += 3;
+                    game.stats.totalCrystals += 3;
                 } else if (item.type === TILES.BIG_AMETHYST) {
                     game.player.amethysts += 5;
+                    game.stats.totalCrystals += 5;
                 } else if (item.type === TILES.HUGE_AMETHYST) {
                     game.player.amethysts += 10;
+                    game.stats.totalCrystals += 10;
                 }
 
                 item.active = false;
@@ -1564,6 +2035,7 @@
     }
 
     function checkKeyInput() {
+        if (game.shop.isOpen) return;
         if (game.player.isMoving) return;
 
         if (game.keys['w'] || game.keys['W'] || game.keys['ц'] || game.keys['Ц']) {
@@ -1581,26 +2053,27 @@
         let nearest = null;
         let minDist = Infinity;
 
-        for (const shrine of game.shrines) {
-            const dist = Math.sqrt(
-                Math.pow(shrine.x - game.player.x, 2) + 
-                Math.pow(shrine.y - game.player.y, 2)
-            );
-            if (dist <= 1.5 && dist < minDist) {
-                minDist = dist;
-                nearest = { type: 'shrine', x: shrine.x, y: shrine.y };
-            }
-        }
-
         for (const magicTile of game.magicTiles) {
             if (magicTile.used) continue;
             const dist = Math.sqrt(
-                Math.pow(magicTile.x - game.player.x, 2) + 
+                Math.pow(magicTile.x - game.player.x, 2) +
                 Math.pow(magicTile.y - game.player.y, 2)
             );
             if (dist <= 1.5 && dist < minDist) {
                 minDist = dist;
                 nearest = { type: 'magicTile', x: magicTile.x, y: magicTile.y };
+            }
+        }
+
+        for (const altar of game.altars) {
+            if (!altar.active) continue;
+            const dist = Math.sqrt(
+                Math.pow(altar.x - game.player.x, 2) +
+                Math.pow(altar.y - game.player.y, 2)
+            );
+            if (dist <= 1.5 && dist < minDist) {
+                minDist = dist;
+                nearest = { type: 'altar', x: altar.x, y: altar.y };
             }
         }
 
@@ -1639,7 +2112,9 @@
             [TILES.SHELTER_STICK]: '#8a7a6a',
             [TILES.SHRINE]: '#ffd700',
             [TILES.MAGIC_TILE]: '#8b00ff',
-            [TILES.MAZE_WALL]: '#2a2a2a'
+            [TILES.MAZE_WALL]: '#2a2a2a',
+            [TILES.ALTAR_WALL]: '#6b6b6b',
+            [TILES.ALTAR_BLOCK]: '#8b00ff'
         };
 
         ctx.fillStyle = colors[tile] || '#000';
@@ -1730,6 +2205,19 @@
         } else if (tile === TILES.MAZE_WALL) {
             ctx.fillStyle = '#1a1a1a';
             ctx.fillRect(screenX + 2, screenY + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+        } else if (tile === TILES.ALTAR_WALL) {
+            ctx.fillStyle = '#6b6b6b';
+            ctx.fillRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
+            ctx.fillStyle = '#555555';
+            ctx.fillRect(screenX + 2, screenY + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+        } else if (tile === TILES.ALTAR_BLOCK) {
+            const gradient = ctx.createLinearGradient(screenX, screenY, screenX + TILE_SIZE, screenY + TILE_SIZE);
+            gradient.addColorStop(0, '#8b00ff');
+            gradient.addColorStop(1, '#ff0000');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(screenX + 2, screenY + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+            ctx.fillStyle = 'rgba(200, 0, 255, 0.3)';
+            ctx.fillRect(screenX, screenY, TILE_SIZE, TILE_SIZE);
         }
     }
 
@@ -1833,6 +2321,35 @@
         ctx.fillRect(screenX + 4, screenY + TILE_SIZE - 4, (TILE_SIZE - 8) * (chief.hp / 3), 2);
     }
 
+    function drawAstrologer(astro) {
+        const screenX = (astro.displayX - game.camera.displayX) * TILE_SIZE;
+        const screenY = (astro.displayY - game.camera.displayY) * TILE_SIZE;
+
+        ctx.fillStyle = '#2d1b4e';
+        ctx.fillRect(screenX + 8, screenY + 14, TILE_SIZE - 16, TILE_SIZE - 10);
+
+        ctx.fillStyle = '#6b21a8';
+        ctx.beginPath();
+        ctx.arc(screenX + TILE_SIZE / 2, screenY + 12, 7, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#7c3aed';
+        ctx.beginPath();
+        ctx.moveTo(screenX + TILE_SIZE / 2 - 8, screenY + 8);
+        ctx.lineTo(screenX + TILE_SIZE / 2, screenY - 6);
+        ctx.lineTo(screenX + TILE_SIZE / 2 + 8, screenY + 8);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = '#5b21b6';
+        ctx.fillRect(screenX + TILE_SIZE / 2 - 10, screenY + 6, 20, 3);
+
+        ctx.fillStyle = '#ff0000';
+        ctx.fillRect(screenX + 4, screenY + TILE_SIZE - 4, TILE_SIZE - 8, 2);
+        ctx.fillStyle = '#00ff00';
+        ctx.fillRect(screenX + 4, screenY + TILE_SIZE - 4, (TILE_SIZE - 8) * (astro.hp / 6), 2);
+    }
+
     function drawDroppedItem(item) {
         const screenX = (item.x - game.camera.displayX) * TILE_SIZE;
         const screenY = (item.y - game.camera.displayY) * TILE_SIZE;
@@ -1870,6 +2387,48 @@
             ctx.arc(screenX, screenY, 8, 0, Math.PI * 2);
             ctx.fill();
             ctx.fillStyle = '#fae8ff';
+            ctx.beginPath();
+            ctx.arc(screenX, screenY, 4, 0, Math.PI * 2);
+            ctx.fill();
+        } else if (item.type === 'POWERUP_KING') {
+            ctx.fillStyle = '#ffd700';
+            ctx.beginPath();
+            ctx.moveTo(screenX - 8, screenY + 4);
+            ctx.lineTo(screenX - 8, screenY - 4);
+            ctx.lineTo(screenX - 4, screenY);
+            ctx.lineTo(screenX, screenY - 8);
+            ctx.lineTo(screenX + 4, screenY);
+            ctx.lineTo(screenX + 8, screenY - 4);
+            ctx.lineTo(screenX + 8, screenY + 4);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = '#ff8c00';
+            ctx.fillRect(screenX - 8, screenY + 4, 16, 3);
+        } else if (item.type === 'POWERUP_ARCHER') {
+            ctx.fillStyle = '#22c55e';
+            ctx.beginPath();
+            ctx.moveTo(screenX, screenY - 10);
+            ctx.lineTo(screenX + 6, screenY);
+            ctx.lineTo(screenX + 2, screenY);
+            ctx.lineTo(screenX + 2, screenY + 8);
+            ctx.lineTo(screenX - 2, screenY + 8);
+            ctx.lineTo(screenX - 2, screenY);
+            ctx.lineTo(screenX - 6, screenY);
+            ctx.closePath();
+            ctx.fill();
+        } else if (item.type === 'POWERUP_ASTROLOGER') {
+            ctx.fillStyle = '#a855f7';
+            ctx.beginPath();
+            for (let i = 0; i < 5; i++) {
+                const angle = (i * 4 * Math.PI) / 5 - Math.PI / 2;
+                const x = screenX + Math.cos(angle) * 10;
+                const y = screenY + Math.sin(angle) * 10;
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = '#e9d5ff';
             ctx.beginPath();
             ctx.arc(screenX, screenY, 4, 0, Math.PI * 2);
             ctx.fill();
@@ -1921,6 +2480,50 @@
         }
     }
 
+    let currentAltar = null;
+
+    function showAltarModal(altar) {
+        currentAltar = altar;
+        document.getElementById('altarOverlay').style.display = 'flex';
+    }
+
+    function altarYes() {
+        document.getElementById('altarOverlay').style.display = 'none';
+        document.getElementById('statEnemiesKilled').textContent = game.stats.enemiesKilled;
+        document.getElementById('statTotalCrystals').textContent = game.stats.totalCrystals;
+        document.getElementById('statsOverlay').style.display = 'flex';
+        sendRewardsToServer();
+    }
+
+    function altarNo() {
+        document.getElementById('altarOverlay').style.display = 'none';
+        if (currentAltar) {
+            setTile(currentAltar.x, currentAltar.y, TILES.GROUND);
+            game.droppedItems.push(new DroppedItem(currentAltar.x, currentAltar.y, TILES.BIG_AMETHYST));
+            game.droppedItems.push(new DroppedItem(currentAltar.x + 1, currentAltar.y, TILES.BIG_AMETHYST));
+            game.droppedItems.push(new DroppedItem(currentAltar.x - 1, currentAltar.y, TILES.BIG_AMETHYST));
+            currentAltar.active = false;
+            currentAltar = null;
+        }
+    }
+
+    function sendRewardsToServer() {
+        //Вписать херню для отправки наград.
+        let xp = game.player.amethysts * 7;
+        let coin = game.player.amethysts * 4;
+        let petal = game.player.amethysts * 2;
+        $.ajax({
+        url: 'items_core',
+        type: 'POST',
+        data: {action: 'add_multiply', xp: xp, coin: coin, sakura: petal},
+        success: function(response) {
+        },
+        error: function(xhr, status, error) {
+            console.error('Ошибка AJAX: ' + error);
+        }
+    });
+    }
+
     function gameLoop() {
         const currentTime = Date.now();
         const deltaTime = (currentTime - game.lastFrameTime) / 1000;
@@ -1943,6 +2546,9 @@
 
         game.archerChiefs.forEach(ac => ac.update(deltaTime));
         game.archerChiefs = game.archerChiefs.filter(ac => ac.active);
+
+        game.astrologers.forEach(astro => astro.update(deltaTime));
+        game.astrologers = game.astrologers.filter(astro => astro.active);
 
         game.projectiles.forEach(p => p.update(deltaTime));
         game.projectiles = game.projectiles.filter(p => p.active);
@@ -1995,6 +2601,10 @@
             if (chief.active) drawArcherChief(chief);
         });
 
+        game.astrologers.forEach(astro => {
+            if (astro.active) drawAstrologer(astro);
+        });
+
         game.projectiles.forEach(proj => {
             if (proj.active) {
                 if (proj instanceof HomingProjectile) {
@@ -2013,6 +2623,7 @@
     }
 
     function startGame() {
+        document.getElementById('shopBtn').style.display = 'flex';
         const seedInput = document.getElementById('seedInput').value.trim();
         let seed = Date.now();
 
@@ -2033,6 +2644,24 @@
     }
 
     document.addEventListener('keydown', (e) => {
+        if (e.key === 'b' || e.key === 'B' || e.key === 'и' || e.key === 'И') {
+            if (game.shop.isOpen) {
+                closeShop();
+            } else {
+                openShop();
+            }
+            return;
+        }
+
+        if (e.key === 'Escape') {
+            if (game.shop.isOpen) {
+                closeShop();
+                return;
+            }
+        }
+
+        if (game.shop.isOpen) return;
+
         if (!game.keys[e.key]) {
             game.keys[e.key] = true;
 
@@ -2042,11 +2671,14 @@
                 playerAttackHoming();
             } else if (e.key === 'f' || e.key === 'F' || e.key === 'а' || e.key === 'А') {
                 playerAction();
+            } else if (e.key === 'r' || e.key === 'R' || e.key === 'к' || e.key === 'К') {
+                playerAttackDeathStar();
             }
         }
     });
 
     document.addEventListener('keyup', (e) => {
+        if (game.shop.isOpen) return;
         game.keys[e.key] = false;
     });
 
